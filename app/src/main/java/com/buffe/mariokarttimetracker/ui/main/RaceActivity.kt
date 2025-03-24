@@ -6,12 +6,12 @@ import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.buffe.mariokarttimetracker.databinding.ActivityRaceBinding
+import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 
 class RaceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRaceBinding
-    private val lapTimes = mutableListOf<LapTime>()
-    private lateinit var adapter: LapTimeAdapter
+    private val raceTimes = mutableListOf<RaceTime>()
     private var isFormatting = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,12 +43,11 @@ class RaceActivity : AppCompatActivity() {
 
     private fun addLapTime() {
         val input = binding.etLapTime.text.toString()
-        if (isValidTimeFormat(input)) {
-            val lapTimeMillis = parseTime(input)
-            val newLapTime = LapTime(lapTimes.size + 1, lapTimeMillis) // Neues LapTime-Objekt
+        if (TimeFormatUtils.isValidTimeFormat(input)) {
+            val lapTimeMillis = TimeFormatUtils.parseTime(input)?:0
+            val newRaceTime = RaceTime(lapTimeMillis) // Neues LapTime-Objekt
 
-            lapTimes.add(newLapTime) // Fügt das Objekt zur Liste hinzu
-            adapter.notifyDataSetChanged() // Aktualisiert die RecyclerView
+            raceTimes.add(newRaceTime) // Fügt das Objekt zur Liste hinzu
 
             updateStatistics() // Aktualisiert Durchschnitts- und Bestzeiten
             binding.etLapTime.text?.clear() // Löscht die Eingabe
@@ -59,21 +58,21 @@ class RaceActivity : AppCompatActivity() {
 
 
     private fun updateStatistics() {
-        if (lapTimes.isEmpty()) {
+        if (raceTimes.isEmpty()) {
             binding.tvAverageRunDiff.text = "Durchschnittszeit: -"
             binding.tvAverageRunDiff.text = "Beste Zeit: -"
             return
         }
 
-        val timesInMillis =
-            lapTimes.map { it.timeInMillis } // Extrahiert die Zeiten aus den LapTime-Objekten
+      /*  val timesInMillis =
+            raceTimes.map { it.timeInMillis } // Extrahiert die Zeiten aus den LapTime-Objekten
 
         val averageTime = timesInMillis.average().toLong()
         val bestTime = timesInMillis.minOrNull() ?: 0L
 
-        binding.tvAverageRunDiff.text = "Durchschnittszeit: ${formatTime(averageTime)}"
-        binding.tvBestRunDiff.text = "Beste Zeit: ${formatTime(bestTime)}"
-
+        binding.tvAverageRunDiff.text = "Durchschnittszeit: ${TimeFormatUtils.formatTime(averageTime)}"
+        binding.tvBestRunDiff.text = "Beste Zeit: ${TimeFormatUtils.formatTime(bestTime)}"
+        */
     }
 
 
@@ -89,25 +88,5 @@ class RaceActivity : AppCompatActivity() {
                 "$minutes:$seconds.$millis"
             }
         }
-    }
-
-    private fun isValidTimeFormat(input: String): Boolean {
-        val regex = Regex("^\\d+:\\d{2}\\.\\d{3}$")
-        return input.matches(regex)
-    }
-
-    private fun parseTime(input: String): Long {
-        val parts = input.split(":", ".")
-        val minutes = parts[0].toLong()
-        val seconds = parts[1].toLong()
-        val milliseconds = parts[2].toLong()
-        return (minutes * 60 * 1000) + (seconds * 1000) + milliseconds
-    }
-
-    private fun formatTime(time: Long): String {
-        val minutes = time / 60000
-        val seconds = (time % 60000) / 1000
-        val milliseconds = time % 1000
-        return "$minutes:$seconds.$milliseconds"
     }
 }

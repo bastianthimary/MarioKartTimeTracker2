@@ -3,6 +3,7 @@ package com.buffe.mariokarttimetracker.ui.main
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.buffe.mariokarttimetracker.databinding.ActivityRaceBinding
@@ -44,7 +45,10 @@ class RaceActivity : AppCompatActivity() {
     private fun addLapTime() {
         val input = binding.etLapTime.text.toString()
         if (TimeFormatUtils.isValidTimeFormat(input)) {
-            val lapTimeMillis = TimeFormatUtils.parseTime(input)?:0
+            val lapTimeMillis = TimeFormatUtils.parseTime(input)?: run {
+                Log.e("RaceActivity", "Fehler beim Parsen der Zeit: $input")
+                return
+            }
             val newRaceTime = RaceTime(lapTimeMillis) // Neues LapTime-Objekt
 
             raceTimes.add(newRaceTime) // Fügt das Objekt zur Liste hinzu

@@ -27,7 +27,7 @@ class RunManager(private val trackRepository: TrackRepository) {
 
     fun moveToNextRace(): Boolean {
         return if (currentRun != null && currentRaceIndex == currentRun!!.races.size-1) {
-            currentRaceIndex=currentRaceIndex++
+            currentRaceIndex++
             true
         } else {
             false

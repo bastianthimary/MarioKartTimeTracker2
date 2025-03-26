@@ -3,6 +3,7 @@ package com.buffe.mariokarttimetracker.ui.main
 import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 
 data class RaceTime(val timeMillis: Long) {
+    constructor(timeString: String):this(TimeFormatUtils.parseTime(timeString))
 
     override fun toString(): String {
         return TimeFormatUtils.formatTime(timeMillis)

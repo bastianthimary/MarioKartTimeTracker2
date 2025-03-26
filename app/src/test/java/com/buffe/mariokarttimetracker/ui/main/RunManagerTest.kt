@@ -46,7 +46,7 @@ class RunManagerTest {
  @Test
  fun `test race can be added and next track is correct`() {
   runManager.startNewRun()
-  runManager.setRaceTime(RaceTime(90000)) // 1:30 Minuten
+  runManager.setRaceTime(RaceTime("1:30.000")) // 1:30 Minuten
   runManager.moveToNextRace()
   val nextTrack = runManager.getCurrentTrack()
   assertEquals("Die nächste Strecke sollte 'Rainbow Road' sein", "Rainbow Road", nextTrack?.name)

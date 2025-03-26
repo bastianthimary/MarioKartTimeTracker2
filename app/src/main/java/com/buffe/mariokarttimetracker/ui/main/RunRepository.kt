@@ -15,9 +15,6 @@ class RunRepository {
         return runs.toList() // Kopie zurückgeben, um Mutable-Zugriff zu vermeiden
     }
 
-    fun getRunById(id: Int): Run? {
-        return runs.find { it.runId == id }
-    }
 
     fun getLatestRun(): Run? {
         return runs.maxByOrNull { it.startTime } // Neuesten Run anhand der Startzeit holen

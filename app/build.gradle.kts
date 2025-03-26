@@ -38,9 +38,18 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation(libs.androidx.room.common)
+    val roomVersion = "2.5.2"
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion") // Muss über kapt laufen
+    implementation("androidx.room:room-ktx:$roomVersion") // Optional für Coroutines-Unterstützung
+
 
     // Test-Abhängigkeiten
+    testImplementation ("io.mockk:mockk:1.13.5")
     testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }

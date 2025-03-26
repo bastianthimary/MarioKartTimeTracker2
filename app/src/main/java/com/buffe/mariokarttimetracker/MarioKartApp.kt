@@ -14,3 +14,5 @@ class MarioKartApp : Application() {
        trackRepository.initializeTracks()
     }
 }
+
+

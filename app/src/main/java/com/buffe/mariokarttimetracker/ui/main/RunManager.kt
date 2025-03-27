@@ -6,19 +6,18 @@ import com.buffe.mariokarttimetracker.data.repository.TrackRepository
 
 class RunManager(private val trackRepository: TrackRepository) {
     private var currentRun: Run? = null
-    private var currentRaceIndex = 0
+
     private val tracks: List<Track> = trackRepository.getAllTracks()
     fun startNewRun(): Run {
         currentRun = Run()
-        currentRaceIndex = 0
         return currentRun!!
     }
 
     fun getCurrentTrack():Track{
-       return tracks[currentRaceIndex]
+       return tracks[currentRun?.currentRaceIndex!!]
     }
     fun getCurrentRace(): Race? {
-        return currentRun?.races?.getOrNull(currentRaceIndex)
+        return currentRun?.races?.getOrNull(currentRun!!.currentRaceIndex)
     }
 
     fun setRaceTime(raceTime: RaceTime) {
@@ -26,8 +25,8 @@ class RunManager(private val trackRepository: TrackRepository) {
     }
 
     fun moveToNextRace(): Boolean {
-        return if (currentRun != null && currentRaceIndex == currentRun!!.races.size-1) {
-            currentRaceIndex++
+        return if (currentRun != null) {
+            currentRun!!.currentRaceIndex
             true
         } else {
             false

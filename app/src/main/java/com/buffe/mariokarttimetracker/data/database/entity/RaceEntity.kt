@@ -16,10 +16,10 @@ onDelete = ForeignKey.CASCADE
 indices = [Index(value = ["trackId"])]
 )
 data class RaceEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,  // Eindeutige ID für jedes Rennen
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,  // Eindeutige ID für jedes Rennen
     val trackId: Int, // Referenz zur Strecke (ForeignKey)
     @ColumnInfo(name = "timeInMillis")
-    val timeInMillis: Long,   // Zeit als Long (für Berechnungen optimiert)
-    val timestamp: Long,       // Zeitpunkt des Rennens (Millisekunden seit 1970)
+    val raceTimeInMillis: Long,   // Zeit als Long (für Berechnungen optimiert)
+    val bestLapTimeInMillis:Long?,
     val runId:Int
 )

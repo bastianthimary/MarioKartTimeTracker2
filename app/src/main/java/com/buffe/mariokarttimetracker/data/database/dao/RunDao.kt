@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
 interface RunDao {
     @Transaction
     @Query("SELECT * FROM run WHERE id = :runId")
-    fun getRunWithRaces(runId: Int): RunWithRaces?
+    suspend fun getRunWithRaces(runId: Int): RunWithRaces?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRun(run: RunEntity): Long
@@ -29,10 +29,11 @@ interface RunDao {
     @Query("SELECT * FROM run WHERE id = :runId LIMIT 1")
     suspend fun getRunById(runId: Int): RunEntity?
 
-    @Query("SELECT * FROM run ORDER BY timestamp DESC")
-    fun getAllRuns(): Flow<List<RunEntity>>
+    @Transaction
+    @Query("SELECT * FROM run")
+    fun getAllRunsWithRaces(): Flow<List<RunWithRaces>>
 
-    @Query("SELECT * FROM run WHERE isFinished = 0 LIMIT 1")
+    @Query("SELECT * FROM run WHERE finished = 0 LIMIT 1")
     suspend fun getCurrentRun(): RunEntity?
 
 

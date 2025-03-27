@@ -2,16 +2,19 @@ package com.buffe.mariokarttimetracker.data.repository
 
 import com.buffe.mariokarttimetracker.data.database.dao.RaceDao
 import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity
+import com.buffe.mariokarttimetracker.data.mapper.RaceMapper
+import com.buffe.mariokarttimetracker.data.model.Race
 
 
 class RaceRepository(private val raceDao: RaceDao) {
 
-    suspend fun insertRace(race: RaceEntity) {
-        return raceDao.insertRace(race)
+    suspend fun insertRace(race: Race, runId: Int) {
+        val entity = RaceMapper.toEntity(race, runId)
+         raceDao.insertRace(entity)
     }
 
-    suspend fun updateRace(race: RaceEntity) {
-        raceDao.updateRace(race)
+    suspend fun updateRace(race: Race,runId: Int) {
+        raceDao.updateRace(RaceMapper.toEntity(race,runId))
     }
 
     suspend fun deleteRace(race: RaceEntity) {

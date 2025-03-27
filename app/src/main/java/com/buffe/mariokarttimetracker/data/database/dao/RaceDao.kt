@@ -21,7 +21,7 @@ interface RaceDao {
     @Delete
     suspend fun deleteRace(race: RaceEntity)
 
-    @Query("SELECT * FROM race WHERE trackId = :trackId ORDER BY timestamp DESC")
+    @Query("SELECT * FROM race WHERE trackId = :trackId ORDER BY id DESC")
     suspend fun getRacesByTrack(trackId: Long): List<RaceEntity>
 
     @Query("""

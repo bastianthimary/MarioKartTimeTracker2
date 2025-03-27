@@ -21,11 +21,11 @@ class RaceRepository(private val raceDao: RaceDao) {
         raceDao.deleteRace(race)
     }
 
-    suspend fun getBestTimeUntil(trackId: Long): Long?{
+    suspend fun getBestTimeUntil(trackId: Int): Long?{
        return raceDao.getBestTimeUntil(trackId)
     }
 
-    suspend fun getAverageTimeUntil(trackId: Long): Long?{
+    suspend fun getAverageTimeUntil(trackId: Int): Long?{
         return raceDao.getAverageTimeUntil(trackId)
     }
 

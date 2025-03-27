@@ -9,19 +9,19 @@ import kotlinx.coroutines.flow.map
 
 class RunRepository(private val runDao: RunDao,private val trackRepository: TrackRepository) {
 
-    suspend fun insertRun(run: Run): Long {
+     suspend fun insertRun(run: Run): Long {
         return runDao.insertRun(RunMapper.toEntity(run))
     }
 
-    suspend fun updateRun(run: Run) {
+     suspend fun updateRun(run: Run) {
         runDao.updateRun(RunMapper.toEntity(run))
     }
 
-    suspend fun deleteRun(run: Run) {
+     suspend fun deleteRun(run: Run) {
         runDao.deleteRun(RunMapper.toEntity(run))
     }
 
-    suspend fun getRunWithRaces(runId: Int): RunWithRaces? {
+     suspend fun getRunWithRaces(runId: Int): RunWithRaces? {
         return runDao.getRunWithRaces(runId)
     }
 

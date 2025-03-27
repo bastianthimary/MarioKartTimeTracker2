@@ -44,7 +44,8 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion") // Muss über kapt laufen
     implementation("androidx.room:room-ktx:$roomVersion") // Optional für Coroutines-Unterstützung
-
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Test-Abhängigkeiten
     testImplementation ("io.mockk:mockk:1.13.5")

@@ -7,12 +7,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity
-
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
 interface RaceDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertRace(race: RaceEntity): Long
 
     @Update
@@ -21,21 +21,12 @@ interface RaceDao {
     @Delete
     suspend fun deleteRace(race: RaceEntity): Int
 
-    @Query("SELECT * FROM race WHERE trackId = :trackId ORDER BY id DESC")
-    suspend fun getRacesByTrack(trackId: Long): List<RaceEntity>
+    @Query("SELECT * FROM race WHERE trackId = :trackId")
+    fun getRacesByTrack(trackId: Int): Flow<List<RaceEntity>>
 
-    @Query("""
-        SELECT MIN(timeInMillis) 
-        FROM race 
-        WHERE trackId = :trackId 
-    """)
-    suspend fun getBestTimeUntil(trackId: Long): Long?
+    @Query("SELECT MIN(timeInMillis) FROM race WHERE trackId = :trackId")
+    fun getBestTimeUntil(trackId: Int): Flow<Long>
 
-    @Query("""
-        SELECT AVG(timeInMillis) 
-        FROM race 
-        WHERE trackId = :trackId 
-    """)
-    suspend fun getAverageTimeUntil(trackId: Long): Long?
-
+    @Query("SELECT AVG(timeInMillis) FROM race WHERE trackId = :trackId")
+    fun getAverageTimeUntil(trackId: Int): Flow<Long>
 }

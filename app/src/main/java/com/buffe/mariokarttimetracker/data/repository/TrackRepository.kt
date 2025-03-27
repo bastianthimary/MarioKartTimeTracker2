@@ -1,8 +1,8 @@
 package com.buffe.mariokarttimetracker.data.repository
 
-import com.buffe.mariokarttimetracker.data.database.TrackDao
-import com.buffe.mariokarttimetracker.data.database.TrackData
-import com.buffe.mariokarttimetracker.data.model.Track
+import com.buffe.mariokarttimetracker.data.database.dao.TrackDao
+import com.buffe.mariokarttimetracker.data.TrackData
+import com.buffe.mariokarttimetracker.data.database.entity.TrackEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,11 +18,11 @@ class TrackRepository(private val trackDao: TrackDao) {
         }
     }
 
-    fun getAllTracks(): List<Track> {
+    fun getAllTracks(): List<TrackEntity> {
         return trackDao.getAllTracks()
     }
 
-    fun getTrackById(id: Int): Track?{
+    fun getTrackById(id: Int): TrackEntity?{
         return trackDao.getTrackById(id)
     }
 }

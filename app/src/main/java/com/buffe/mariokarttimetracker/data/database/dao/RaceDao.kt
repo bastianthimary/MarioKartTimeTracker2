@@ -13,13 +13,13 @@ import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity
 @Dao
 interface RaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRace(race: RaceEntity)
+    suspend fun insertRace(race: RaceEntity): Long
 
     @Update
-    suspend fun updateRace(race: RaceEntity)
+    suspend fun updateRace(race: RaceEntity): Int
 
     @Delete
-    suspend fun deleteRace(race: RaceEntity)
+    suspend fun deleteRace(race: RaceEntity): Int
 
     @Query("SELECT * FROM race WHERE trackId = :trackId ORDER BY id DESC")
     suspend fun getRacesByTrack(trackId: Long): List<RaceEntity>

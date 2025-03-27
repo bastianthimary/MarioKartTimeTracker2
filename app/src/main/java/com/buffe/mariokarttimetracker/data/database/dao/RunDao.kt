@@ -21,17 +21,17 @@ interface RunDao {
     suspend fun insertRun(run: RunEntity): Long
 
     @Update
-    suspend fun updateRun(run: RunEntity)
+    suspend fun updateRun(run: RunEntity): Int
 
     @Delete
-    suspend fun deleteRun(run: RunEntity)
+    suspend fun deleteRun(run: RunEntity): Int
 
     @Query("SELECT * FROM run WHERE id = :runId LIMIT 1")
     suspend fun getRunById(runId: Int): RunEntity?
 
     @Transaction
     @Query("SELECT * FROM run")
-    fun getAllRunsWithRaces(): Flow<List<RunWithRaces>>
+    suspend fun getAllRunsWithRaces(): Flow<List<RunWithRaces>>
 
     @Query("SELECT * FROM run WHERE finished = 0 LIMIT 1")
     suspend fun getCurrentRun(): RunEntity?

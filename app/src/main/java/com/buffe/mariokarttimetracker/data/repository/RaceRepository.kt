@@ -4,6 +4,7 @@ import com.buffe.mariokarttimetracker.data.database.dao.RaceDao
 import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity
 import com.buffe.mariokarttimetracker.data.mapper.RaceMapper
 import com.buffe.mariokarttimetracker.data.model.Race
+import kotlinx.coroutines.flow.first
 
 
 class RaceRepository(private val raceDao: RaceDao) {
@@ -21,12 +22,12 @@ class RaceRepository(private val raceDao: RaceDao) {
         raceDao.deleteRace(race)
     }
 
-    suspend fun getBestTimeUntil(trackId: Int): Long?{
-       return raceDao.getBestTimeUntil(trackId)
+    suspend fun getBestTimeUntil(trackId: Int): Long{
+       return raceDao.getBestTimeUntil(trackId).first()
     }
 
-    suspend fun getAverageTimeUntil(trackId: Int): Long?{
-        return raceDao.getAverageTimeUntil(trackId)
+    suspend fun getAverageTimeUntil(trackId: Int): Long{
+        return raceDao.getAverageTimeUntil(trackId).first()
     }
 
 

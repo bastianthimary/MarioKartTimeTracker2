@@ -8,8 +8,13 @@ data class Run(
     val startTime: Long = System.currentTimeMillis(),
     val currentTrackId: Int?, // ID der aktuellen Strecke (null, wenn der Run abgeschlossen ist)
     val races: MutableList<Race> = mutableListOf<Race>()
-    ){// Startzeit wird automatisch gesetzt
+    ){
+
+
+    // Startzeit wird automatisch gesetzt
      var currentRaceIndex = 0
+
+    constructor() : this(null, System.currentTimeMillis(), null, mutableListOf())
     fun addRace(race: Race) {
         if (races.size < 96) {
             races.add(race)

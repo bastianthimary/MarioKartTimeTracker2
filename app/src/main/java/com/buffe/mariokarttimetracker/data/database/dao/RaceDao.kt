@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RaceDao {
-    @Insert
-    suspend fun insertRace(race: RaceEntity): Long
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRace(race: RaceEntity):Long
 
     @Update
-    suspend fun updateRace(race: RaceEntity): Int
+    suspend fun updateRace(race: RaceEntity)
 
     @Delete
     suspend fun deleteRace(race: RaceEntity): Int

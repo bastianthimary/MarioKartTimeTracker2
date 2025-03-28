@@ -21,7 +21,7 @@ class RunManager(private val trackRepository: TrackRepository) {
     }
 
     fun setRaceTime(raceTime: RaceTime) {
-        currentRun?.addRace(Race(getCurrentTrack(),raceTime,null))
+        currentRun?.addRace(Race(0,getCurrentTrack(),raceTime,null))
     }
 
     fun moveToNextRace(): Boolean {

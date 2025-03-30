@@ -1,14 +1,12 @@
 package com.buffe.mariokarttimetracker.data.database.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
 
-@Entity(tableName = "track")
+
+@Entity
 data class TrackEntity(
-    @PrimaryKey
-    @ColumnInfo(name = "id")
-    val id: Int,
-    @ColumnInfo(name = "name")
-    val name: String    // Name der Strecke
+    @Id(assignable = true)
+    var id: Long = 0,
+    var name: String = ""   // Name der Strecke
 )

@@ -1,25 +1,16 @@
 package com.buffe.mariokarttimetracker.data.database.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
+import io.objectbox.relation.ToOne
 
-@Entity(tableName = "race",
-foreignKeys = [ForeignKey(
-entity = TrackEntity::class,
-parentColumns = ["id"],
-childColumns = ["trackId"],
-onDelete = ForeignKey.CASCADE
-)],
-indices = [Index(value = ["trackId"])]
-)
+@Entity
 data class RaceEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,  // Eindeutige ID für jedes Rennen
-    val trackId: Int, // Referenz zur Strecke (ForeignKey)
-    @ColumnInfo(name = "timeInMillis")
-    val raceTimeInMillis: Long,   // Zeit als Long (für Berechnungen optimiert)
-    val bestLapTimeInMillis:Long?,
-    val runId:Int
-)
+   @Id var id: Long = 0,  // Eindeutige ID für jedes Rennen
+    var raceTimeInMillis: Long=0,   // Zeit als Long (für Berechnungen optimiert)
+    var bestLapTimeInMillis:Long?=null,
+
+){
+    lateinit var track: ToOne<TrackEntity>
+   lateinit var run:ToOne<RunEntity>
+}

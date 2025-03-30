@@ -1,33 +1,31 @@
 package com.buffe.mariokarttimetracker.data.repository
 
-import com.buffe.mariokarttimetracker.data.database.dao.RaceDao
+import com.buffe.mariokarttimetracker.MarioKartApp
 import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity
+import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity_
 import com.buffe.mariokarttimetracker.data.mapper.RaceMapper
 import com.buffe.mariokarttimetracker.data.model.Race
-import kotlinx.coroutines.flow.first
+import com.buffe.mariokarttimetracker.ui.main.Run
+import io.objectbox.Box
 
 
-class RaceRepository(private val raceDao: RaceDao) {
-
-    suspend fun insertRace(race: Race, runId: Int) {
-        val entity = RaceMapper.toEntity(race, runId)
-         raceDao.insertRace(entity)
+class RaceRepository {
+    private val raceBox: Box<RaceEntity> = MarioKartApp.boxStore.boxFor(RaceEntity::class.java)
+    fun insertRace(race: Race, run: Run) {
+        raceBox.put(RaceMapper.toEntity(race, run))
     }
 
-    suspend fun updateRace(race: Race,runId: Int) {
-        raceDao.updateRace(RaceMapper.toEntity(race,runId))
+    fun updateRace(race: Race, run: Run) {
+        raceBox.put(RaceMapper.toEntity(race, run))
     }
 
-    suspend fun deleteRace(race: RaceEntity) {
-        raceDao.deleteRace(race)
+    fun getBestTimeUntil(trackId: Int): Long {
+
+        return raceBox.query().build().property(RaceEntity_.raceTimeInMillis).min()
     }
 
-    suspend fun getBestTimeUntil(trackId: Int): Long{
-       return raceDao.getBestTimeUntil(trackId).first()
-    }
-
-    suspend fun getAverageTimeUntil(trackId: Int): Long{
-        return raceDao.getAverageTimeUntil(trackId).first()
+    fun getAverageTimeUntil(trackId: Int): Long {
+        return  raceBox.query().build().property(RaceEntity_.raceTimeInMillis).avgLong()
     }
 
 

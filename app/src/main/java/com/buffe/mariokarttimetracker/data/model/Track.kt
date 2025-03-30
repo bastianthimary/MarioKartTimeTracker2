@@ -6,6 +6,6 @@ package com.buffe.mariokarttimetracker.data.model
 
 data class Track(
 
-    val id: Int,  // Eindeutige ID für die Strecke
+    val id: Long,  // Eindeutige ID für die Strecke
     val name: String    // Name der Strecke
 )

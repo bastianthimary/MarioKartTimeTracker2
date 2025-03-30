@@ -1,16 +1,23 @@
 package com.buffe.mariokarttimetracker
 
 import android.app.Application
-import com.buffe.mariokarttimetracker.data.database.AppDatabase
+import com.buffe.mariokarttimetracker.data.database.entity.MyObjectBox
+
 import com.buffe.mariokarttimetracker.data.repository.TrackRepository
+import io.objectbox.BoxStore
 
 
 class MarioKartApp : Application() {
+    companion object {
+        lateinit var boxStore: BoxStore
+            private set
+    }
     override fun onCreate() {
         super.onCreate()
 
-        val database = AppDatabase.getDatabase(this)
-        val trackRepository = TrackRepository(database.trackDao())
+        boxStore = MyObjectBox.builder()
+            .androidContext(this).build()
+        val trackRepository = TrackRepository()
        trackRepository.initializeTracks()
     }
 }

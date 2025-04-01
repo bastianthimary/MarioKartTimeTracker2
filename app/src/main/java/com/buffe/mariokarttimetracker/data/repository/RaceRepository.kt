@@ -19,14 +19,18 @@ class RaceRepository {
         raceBox.put(RaceMapper.toEntity(race, run))
     }
 
-    fun getBestTimeUntil(trackId: Int): Long {
+    fun getBestRaceTimeOfTrack(trackId: Int): Long {
 
         return raceBox.query().build().property(RaceEntity_.raceTimeInMillis).min()
     }
 
-    fun getAverageTimeUntil(trackId: Int): Long {
+    fun getAverageRaceTimeOfTrack(trackId: Int): Long {
         return  raceBox.query().build().property(RaceEntity_.raceTimeInMillis).avgLong()
     }
 
-
+    fun getAllRacesTillTrack(runId: Long,trackId:Long):List<RaceEntity>{
+       return raceBox.query(
+            RaceEntity_.trackId.lessOrEqual(trackId)
+        .and(RaceEntity_.runId.equal(runId))).build().find()
+    }
 }

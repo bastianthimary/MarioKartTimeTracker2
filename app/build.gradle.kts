@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("io.objectbox")
 }
 
 android {
@@ -38,13 +39,16 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation(libs.androidx.room.common)
-    val roomVersion = "2.5.2"
 
-    implementation("androidx.room:room-runtime:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion") // Muss über kapt laufen
-    implementation("androidx.room:room-ktx:$roomVersion") // Optional für Coroutines-Unterstützung
+    implementation("io.objectbox:objectbox-kotlin:4.2.0")
+    implementation("io.objectbox:objectbox-android:4.2.0")
+    implementation("io.objectbox:objectbox-gradle-plugin:4.2.0")
+    kapt("io.objectbox:objectbox-processor:4.2.0")
 
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0")
 
     // Test-Abhängigkeiten
     testImplementation ("io.mockk:mockk:1.13.5")

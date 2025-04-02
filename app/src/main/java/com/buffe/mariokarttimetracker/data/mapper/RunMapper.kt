@@ -10,6 +10,7 @@ object RunMapper {
             startTime = runEntity.startTime,
             currentTrack = TrackMapper.toDomain(runEntity.currentTrack.target),
             races = runEntity.races.map { entity -> RaceMapper.toDomain(entity) }.toMutableList()
+
         )
     }
 
@@ -18,7 +19,7 @@ object RunMapper {
             id = run.id ?: 0,
             startTime = run.startTime,
             finished = run.isCompleted(),
-
+            currentRaceIndex = run.currentRaceIndex
             )
         run.currentTrack?.let {
             runEntity.currentTrack.setAndPutTarget(TrackMapper.toEntity(run.currentTrack))

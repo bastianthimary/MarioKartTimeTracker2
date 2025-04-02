@@ -19,18 +19,30 @@ class RaceRepository {
         raceBox.put(RaceMapper.toEntity(race, run))
     }
 
-    fun getBestRaceTimeOfTrack(trackId: Int): Long {
-
-        return raceBox.query().build().property(RaceEntity_.raceTimeInMillis).min()
+    fun getBestRaceTimeOfTrack(trackId: Long): Long {
+        return getAllRacesByTrack(trackId).minOfOrNull { it.raceTimeInMillis } ?: 0L
     }
 
-    fun getAverageRaceTimeOfTrack(trackId: Int): Long {
-        return  raceBox.query().build().property(RaceEntity_.raceTimeInMillis).avgLong()
+    fun getAverageRaceTimeOfTrack(trackId: Long): Long {
+        if (getAllRacesByTrack(trackId).isEmpty()) {
+            return 0L
+        }
+        return raceBox.query(RaceEntity_.trackId.equal(trackId)).build()
+            .property(RaceEntity_.raceTimeInMillis).avgLong()
     }
 
-    fun getAllRacesTillTrack(runId: Long,trackId:Long):List<RaceEntity>{
-       return raceBox.query(
+    fun getAllRacesByTrack(trackId: Long): List<RaceEntity> {
+        val query = raceBox.query(RaceEntity_.trackId.equal(trackId)).build()
+        val result = query.find()
+        query.close()
+        return result
+    }
+
+    fun getAllRacesTillTrack(runId: Long, trackId: Long): List<RaceEntity> {
+        return raceBox.query(
             RaceEntity_.trackId.lessOrEqual(trackId)
-        .and(RaceEntity_.runId.equal(runId))).build().find()
+                .and(RaceEntity_.runId.equal(runId))
+        ).build().find()
     }
+
 }

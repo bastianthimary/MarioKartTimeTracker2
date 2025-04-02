@@ -33,10 +33,11 @@ class RunRepository {
     }
 
     fun getCurrentRun(): Run? {
-        return runBox.query {
-            equal(RunEntity_.finished, false)
-            build()
-        }.findFirst()?.let { RunMapper.toDomain(it) }
+        val query = runBox.query(RunEntity_.finished.equal(false)).build()
+
+        val result = query.findFirst()
+        query.close()
+        return result?.let { RunMapper.toDomain(it) }
     }
 
     fun getTimeOfAverageCompleteRun(): Long {
@@ -46,16 +47,22 @@ class RunRepository {
     }
 
     fun getFinishedRuns(): List<RunEntity> {
-        return runBox.query {
+         val query=runBox.query {
             equal(RunEntity_.finished, true)
             build()
-        }.find()
+        }
+           val result=query.find()
+        query.close()
+        return result
     }
 
     private fun getNumberOfFinishedRuns(): Int {
-        return runBox.query {
+        val query= runBox.query {
             equal(RunEntity_.finished, true)
-        }.count().toInt()
+        }
+          val count=query.count().toInt()
+          query.close()
+        return count
     }
 
     fun getBestRunTimeOfAll(): Long {
@@ -73,7 +80,6 @@ class RunRepository {
        return getFinishedRuns().sumOf { run-> sumOfRaceTimes(
             raceRepository.getAllRacesTillTrack(run.id,trackId))}/getNumberOfFinishedRuns()
     }
-
 
 }
 

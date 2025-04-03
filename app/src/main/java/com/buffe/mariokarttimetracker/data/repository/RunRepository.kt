@@ -72,11 +72,11 @@ class RunRepository {
     fun sumOfRaceTimes(races: List<RaceEntity>): Long {
         return races.sumOf { it.raceTimeInMillis }
     }
-    fun getBestRunTimeTillTrack(trackId:Long):Long{
+    fun getBestRunTimeTillTrack(trackId:Int):Long{
        return getFinishedRuns().minOf { run-> sumOfRaceTimes(
             raceRepository.getAllRacesTillTrack(run.id,trackId))}
     }
-    fun getAverageRunTimeTillTrack(trackId:Long):Long{
+    fun getAverageRunTimeTillTrack(trackId:Int):Long{
        return getFinishedRuns().sumOf { run-> sumOfRaceTimes(
             raceRepository.getAllRacesTillTrack(run.id,trackId))}/getNumberOfFinishedRuns()
     }

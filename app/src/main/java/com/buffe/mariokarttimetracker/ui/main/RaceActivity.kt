@@ -5,7 +5,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.buffe.mariokarttimetracker.data.repository.TrackRepository
 import com.buffe.mariokarttimetracker.databinding.ActivityRaceBinding
 import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 import com.buffe.mariokarttimetracker.util.TimeFormatUtils.isValidTimeFormat
@@ -14,7 +13,7 @@ class RaceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRaceBinding
     private var isFormatting = false
-    private val runManager = RunManager(TrackRepository())
+    private val runManager = RunManager()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRaceBinding.inflate(layoutInflater)
@@ -57,7 +56,6 @@ class RaceActivity : AppCompatActivity() {
             if (isValidTimeFormat(input)) {
                 val raceTime = RaceTime.fromString(input)
                 runManager.addCurrentRace(raceTime)
-                runManager.moveToNextRace()
                 updateUI() // UI aktualisieren: nächstes Rennen laden, Statistiken aktualisieren
             } else {
                 Toast.makeText(this, "Das Zeitformat ist nicht Valide", Toast.LENGTH_SHORT).show()
@@ -68,7 +66,7 @@ class RaceActivity : AppCompatActivity() {
     private fun updateUI() {
         // Hole das aktuelle Rennen vom RunManager
         val currentTrack = runManager.getCurrentTrack()
-        supportActionBar?.title = currentTrack.name
+        supportActionBar?.title = currentTrack.displayName
         // Aktualisiere aggregierte Zeiten (Gesamtzeit bis zur aktuellen Strecke, beste und durchschnittliche Zeit)
         binding.tvRunTotalTime.text = "Gesamtzeit: ${runManager.getCurrentRunTotalTimeFormatted()}"
         binding.tvBestTime.text = "Beste Zeit: ${runManager.getCurrentBestTimeFormatted()}"

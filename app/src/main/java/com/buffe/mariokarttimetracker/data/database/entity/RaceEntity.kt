@@ -6,11 +6,12 @@ import io.objectbox.relation.ToOne
 
 @Entity
 data class RaceEntity(
-   @Id var id: Long = 0,  // Eindeutige ID für jedes Rennen
-    var raceTimeInMillis: Long=0,   // Zeit als Long (für Berechnungen optimiert)
-    var bestLapTimeInMillis:Long?=null,
+    @Id var id: Long = 0,  // Eindeutige ID für jedes Rennen
+    var raceTimeInMillis: Long = 0,   // Zeit als Long (für Berechnungen optimiert)
+    var bestLapTimeInMillis: Long? = null,
+    var trackId: Int = 0
 
-){
-    lateinit var track: ToOne<TrackEntity>
-   lateinit var run:ToOne<RunEntity>
+) {
+
+    lateinit var run: ToOne<RunEntity>
 }

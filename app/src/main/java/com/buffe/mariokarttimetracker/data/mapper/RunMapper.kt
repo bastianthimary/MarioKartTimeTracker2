@@ -8,9 +8,8 @@ object RunMapper {
         return Run(
             id = runEntity.id,
             startTime = runEntity.startTime,
-            currentTrack = TrackMapper.toDomain(runEntity.currentTrack.target),
-            races = runEntity.races.map { entity -> RaceMapper.toDomain(entity) }.toMutableList()
-
+            races = runEntity.races.map { RaceMapper.toDomain(it) }.toMutableList(),
+            currentRaceIndex = runEntity.currentRaceIndex
         )
     }
 
@@ -20,11 +19,9 @@ object RunMapper {
             startTime = run.startTime,
             finished = run.isCompleted(),
             currentRaceIndex = run.currentRaceIndex
-            )
-        run.currentTrack?.let {
-            runEntity.currentTrack.setAndPutTarget(TrackMapper.toEntity(run.currentTrack))
-        }
-        runEntity.races.addAll(run.races.map { RaceMapper.toEntity(it, run) })
+        )
+        val raceEntities = run.races.map { RaceMapper.toEntity(it, runEntity) }
+        runEntity.races.addAll(raceEntities)
         return runEntity
     }
 }

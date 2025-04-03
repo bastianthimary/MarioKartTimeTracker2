@@ -11,6 +11,7 @@ class RunManager {
     private lateinit var currentRun: Run
     private val runRepository = RunRepository()
     private val raceRepository = RaceRepository()
+    private val MAX_NUMBER_OF_RACES=96
     fun startNewRun(): Run {
         currentRun = Run()
         return currentRun
@@ -27,7 +28,9 @@ class RunManager {
     }
 
     fun moveToNextRace() {
-        currentRun.incrementCurrentRaceIndexByOne()
+        if(currentRun.currentRaceIndex<MAX_NUMBER_OF_RACES){
+            currentRun.incrementCurrentRaceIndexByOne()
+        }
     }
 
     fun initializeOrContinueCurrentRun() {
@@ -49,5 +52,9 @@ class RunManager {
 
     fun getCurrentAverageTimeFormatted(): String {
         return TimeFormatUtils.formatTime(raceRepository.getAverageRaceTimeOfTrack(getCurrentTrack().id))
+    }
+
+    fun isFinished(): Boolean {
+        return currentRun.isCompleted()
     }
 }

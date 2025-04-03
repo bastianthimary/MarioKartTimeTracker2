@@ -64,6 +64,9 @@ class RaceActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
+        if(runManager.isFinished()){
+
+        }
         // Hole das aktuelle Rennen vom RunManager
         val currentTrack = runManager.getCurrentTrack()
         supportActionBar?.title = currentTrack.displayName

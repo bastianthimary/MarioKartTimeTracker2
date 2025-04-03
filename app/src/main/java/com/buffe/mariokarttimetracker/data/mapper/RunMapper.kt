@@ -8,22 +8,32 @@ object RunMapper {
         return Run(
             id = runEntity.id,
             startTime = runEntity.startTime,
-            currentTrack = TrackMapper.toDomain(runEntity.currentTrack.target),
-            races = runEntity.races.map { entity -> RaceMapper.toDomain(entity) }.toMutableList()
+            races = runEntity.races.map { RaceMapper.toDomain(it) }.toMutableList(),
+            currentRaceIndex = runEntity.currentRaceIndex
         )
     }
 
-    fun toEntity(run: Run): RunEntity {
-        val runEntity = RunEntity(
+    fun toEntity(run: Run, existingEntity: RunEntity? = null): RunEntity {
+        val runEntity = existingEntity ?: RunEntity(
             id = run.id ?: 0,
             startTime = run.startTime,
             finished = run.isCompleted(),
+            currentRaceIndex = run.currentRaceIndex
+        )
 
-            )
-        run.currentTrack?.let {
-            runEntity.currentTrack.setAndPutTarget(TrackMapper.toEntity(run.currentTrack))
+        // Nur bei neuer Entity Felder setzen
+        if (existingEntity == null) {
+            runEntity.id = run.id ?: 0
+            runEntity.startTime = run.startTime
+            runEntity.finished = run.isCompleted()
+            runEntity.currentRaceIndex = run.currentRaceIndex
         }
-        runEntity.races.addAll(run.races.map { RaceMapper.toEntity(it, run) })
+
+        // Races immer neu mappen
+        val raceEntities = run.races.map { RaceMapper.toEntity(it, runEntity) }
+        runEntity.races.clear()
+        runEntity.races.addAll(raceEntities)
+
         return runEntity
     }
 }

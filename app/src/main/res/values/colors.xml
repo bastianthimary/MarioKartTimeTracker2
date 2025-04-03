@@ -6,4 +6,8 @@
     <color name="teal_700">#018786</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="titleText">#03DAC5</color>
+    <color name="raceTimeLead">#3AFC1F</color>
+    <color name="raceTimeBack">#FC1D0C</color>
+    <color name="raceTimeRecord">#F2E409</color>
 </resources>

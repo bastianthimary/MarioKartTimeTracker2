@@ -40,6 +40,7 @@ class RaceActivity : AppCompatActivity() {
                     binding.etRaceTime.setSelection(formatted.length)
                 }
                 if(isValidTimeFormat(formatted)){
+                    binding.tvRunTotalTime.text="Gesamtzeit: ${calcYourTimeNow()}"
                     binding.btnNextRace.isEnabled=true
                 }
                 isFormatting = false
@@ -63,6 +64,12 @@ class RaceActivity : AppCompatActivity() {
         }
     }
 
+    private fun calcYourTimeNow(): String {
+      val totalTimeBeforeRace= TimeFormatUtils.parseTime(runManager.getCurrentRunTotalTimeFormatted())
+        val yourTimeNowInMs=totalTimeBeforeRace+TimeFormatUtils.parseTime(binding.etRaceTime.text.toString())
+        return TimeFormatUtils.formatTime(yourTimeNowInMs)
+    }
+
     private fun updateUI() {
         if(runManager.isFinished()){
 
@@ -72,11 +79,14 @@ class RaceActivity : AppCompatActivity() {
         supportActionBar?.title = currentTrack.displayName
         // Aktualisiere aggregierte Zeiten (Gesamtzeit bis zur aktuellen Strecke, beste und durchschnittliche Zeit)
         binding.tvRunTotalTime.text = "Gesamtzeit: ${runManager.getCurrentRunTotalTimeFormatted()}"
-        binding.tvBestTime.text = "Beste Zeit: ${runManager.getCurrentBestTimeFormatted()}"
-        binding.tvAverageTime.text = "Durchschnitt: ${runManager.getCurrentAverageTimeFormatted()}"
+        binding.tvBestTime.text = "Beste Zeit: ${runManager.getCurrentBestTotalTimeFormatted()}"
+        binding.tvAverageTime.text = "Durchschnitt: ${runManager.getCurrentAverageTotalTimeFormatted()}"
 
         // Leere das Eingabefeld, falls vorhanden
         binding.etRaceTime.text?.clear()
+        //Aktualisiere Historische Strecken Zeiten Durchschnitt und Bestzeiten
+        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${runManager.getCurrentBestTrackTimeFormatted()}"
+        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${runManager.getCurrentAverageTrackTimeFormatted()}"
 
         // Aktivieren/Deaktivieren des "Nächstes Rennen"-Buttons
         binding.btnNextRace.isEnabled =

@@ -58,24 +58,24 @@ enum class Track( val id: Int,  // Eindeutige ID für die Strecke
     // Ei-Cup (DLC 1)
     YOSHIS_PISTE_GCN(33, "Yoshis Piste (GCN)"),
     EXCITEBIKE_STADION(34, "Excitebike-Stadion"),
-    DRACHEN_DRIFTWAY(35, "Drachen-Driftway"),
+    GROSSE_DRACHENMAUER(35, "Große Drachenmauer"),
     MUTE_CITY(36, "Mute City"),
 
     // Triforce-Cup (DLC 1)
     WARIOS_GOLDMINE_WII(37, "Warios Goldmine (Wii)"),
     REGENBOGEN_BOULEVARD_SNES(38, "Regenbogen-Boulevard (SNES)"),
-    EISKREM_TRACK_ENTITY(39, "Eiskrem- TrackEntity"),
+    POLARKREIS_PARCOURS(39, "Polarkreis-Parcours"),
     HYRULE_PISTE(40, "Hyrule-Piste"),
 
     // Crossing-Cup (DLC 2)
     BABY_PARK_GCN(41, "Baby-Park (GCN)"),
     KASELAND_GBA(42, "Käseland (GBA)"),
-    WILD_WOODS(43, "Wild-Woods"),
-    ANIMAL_CROSSING(44, "Animal Crossing"),
+    WILDER_WIPFELWEG(43, "Wilder Wipfelweg"),
+    ANIMAL_CROSSING_DORF(44, "Animal Crossing Dorf"),
 
     // Glocken-Cup (DLC 2)
     KOOPA_GROSSSTADTFIEBER_3DS(45, "Koopa-Großstadtfieber (3DS)"),
-    RIBBON_ROAD_GBA(46, "Ribbon Road (GBA)"),
+    PARTY_STRASSE_GBA(46, "Party Straße (GBA)"),
     MARIOS_METRO(47, "Marios Metro"),
     BIG_BLUE(48, "Big Blue"),
 
@@ -88,7 +88,7 @@ enum class Track( val id: Int,  // Eindeutige ID für die Strecke
     // Glückskatzen-Cup
     TOKIO_TEMPOTOUR_TOUR(53, "Tokio-Tempotour (Tour)"),
     PILZ_PASS_DS(54, "Pilz-Pass (DS)"),
-    HIMMELSGARTEN_GBA(55, "Himmelsgarten (GBA)"),
+    WOLKENPISTE_GBA(55, "Wolkenpiste (GBA)"),
     NINJA_DOJO_TOUR(56, "Ninja-Dojo (Tour)"),
 
     // Rüben-Cup
@@ -106,35 +106,35 @@ enum class Track( val id: Int,  // Eindeutige ID für die Strecke
     // Fels-Cup
     LONDON_TOUR_TOUR(65, "London-Tour (Tour)"),
     BUU_HUU_TAL_GBA(66, "Buu-Huu-Tal (GBA)"),
-    BERGPHAD_3DS(67, "Bergpfad (3DS)"),
+    GEBIRGSPFAD_3DS(67, "Gebirgspfad (3DS)"),
     BLATTERWALD_WII(68, "Blätterwald (Wii)"),
 
     // Mond-Cup
-    BERLIN_BEI_NACHT_TOUR(69, "Berlin bei Nacht (Tour)"),
+    PFLASTER_VON_BERLIN_TOUR(69, "Pflaster von Berlin (Tour)"),
     PEACHS_SCHLOSSGARTEN_DS(70, "Peachs Schlossgarten (DS)"),
-    MERRY_MOUNTAIN(71, "Merry Mountain"),
+    BERGBESCHERUNG_TOUR(71, "Bergscherung (Tour)"),
     REGENBOGEN_BOULEVARD_3DS(72, "Regenbogen-Boulevard (3DS)"),
 
     // Frucht-Cup
-    AMSTERDAM_DRIFT_TOUR(73, "Amsterdam-Drift (Tour)"),
-    RIVERSIDE_PARK_GBA(74, "Riverside Park (GBA)"),
-    DKS_SCHNEELAND_WII(75, "DKs Schneeland (Wii)"),
-    YOSHIS_INSEL(76, "Yoshis Insel"),
+    AUSFAHRT_AMSTERDAM_TOUR(73, "Ausfahrt Amsterdam (Tour)"),
+    FLUSSUFER_PARK_GBA(74, "Flussufer Park (GBA)"),
+    DK_SKIKANE_WII(75, "DKs Skikane (Wii)"),
+    YOSHIS_EILAND(76, "Yoshis Eiland"),
 
     // Bumerang-Cup
-    BANGKOK_RUSH_TOUR(77, "Bangkok Rush (Tour)"),
+    BANGKOK_ABENDROT_TOUR(77, "Bangkok Abendrot (Tour)"),
     MARIOS_PISTE_DS(78, "Marios Piste (DS)"),
-    WALUIGI_FLIPPER_GCN(79, "Waluigi-Flipper (GCN)"),
-    SINGAPUR_SPEEDWAY_TOUR(80, "Singapur-Speedway (Tour)"),
+    WALUIGI_ARENA_GCN(79, "Waluigi-Flipper (GCN)"),
+    UEBERHOLSPUR_SINGAPUR_TOUR(80, "Überholspur Singapur (Tour)"),
 
     // Feder-Cup
-    ATHEN_ABENTEUER_TOUR(81, "Athen-Abenteuer (Tour)"),
-    DAISYS_KREUZFAHRT_GCN(82, "Daisys Kreuzfahrt (GCN)"),
+    ATHEN_AUF_ABWEGEN_TOUR(81, "Athen auf Abwegen (Tour)"),
+    DAISYS_DAMPFER_GCN(82, "Daisys Dampfer (GCN)"),
     MONDBLICKSTRASSE_WII(83, "Mondblickstraße (Wii)"),
-    BADEWANNEN_PARCOURS(84, "Badewannen-Parcours"),
+    BAD_PARCOURS(84, "Badewannen-Parcours"),
 
     // Doppelkirschen-Cup
-    LOS_ANGELES_LAPS_TOUR(85, "Los Angeles Laps (Tour)"),
+    LOS_ANGELES_STRANDPARTIE_TOUR(85, "Los Angeles Strandpartie (Tour)"),
     SONNENUNTERGANGS_WUSTE_GBA(86, "Sonnenuntergangs-Wüste (GBA)"),
     KOOPA_KAP_WII(87, "Koopa-Kap (Wii)"),
     VANCOUVER_WILDPFAD_TOUR(88, "Vancouver-Wildpfad (Tour)"),

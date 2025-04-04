@@ -46,11 +46,18 @@ class RunManager {
         return TimeFormatUtils.formatTime(currentRun.races.sumOf { it.raceTime.timeMillis })
     }
 
-    fun getCurrentBestTimeFormatted(): String {
+    fun getCurrentBestTotalTimeFormatted(): String {
+        return TimeFormatUtils.formatTime(runRepository.getBestRunTimeTillTrack(getCurrentTrack().id))
+    }
+
+    fun getCurrentAverageTotalTimeFormatted(): String {
+        return TimeFormatUtils.formatTime(runRepository.getAverageRunTimeTillTrack(getCurrentTrack().id))
+    }
+    fun getCurrentBestTrackTimeFormatted(): String {
         return TimeFormatUtils.formatTime(raceRepository.getBestRaceTimeOfTrack(getCurrentTrack().id))
     }
 
-    fun getCurrentAverageTimeFormatted(): String {
+    fun getCurrentAverageTrackTimeFormatted(): String {
         return TimeFormatUtils.formatTime(raceRepository.getAverageRaceTimeOfTrack(getCurrentTrack().id))
     }
 

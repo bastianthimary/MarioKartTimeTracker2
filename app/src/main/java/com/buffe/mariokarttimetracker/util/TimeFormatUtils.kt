@@ -7,6 +7,22 @@ object TimeFormatUtils {
         val millis = timeMillis % 1000
         return String.format("%d:%02d.%03d", minutes, seconds, millis)
     }
+    fun hourFormatTime(timeMillis: Long): String {
+        val hours = timeMillis / 3_600_000
+        val remainingMillis = timeMillis % 3_600_000
+        val minutes = remainingMillis / 60_000
+        val remainingAfterMinutes = remainingMillis % 60_000
+        val seconds = remainingAfterMinutes / 1_000
+        val millis = remainingAfterMinutes % 1_000
+
+        return String.format(
+            "%02d:%02d:%02d.%03d",
+            hours,
+            minutes,
+            seconds,
+            millis
+        )
+    }
 
     fun parseTime(timeString: String): Long {
         val regex = Regex("^(\\d+):(\\d{2})\\.(\\d{3})$")

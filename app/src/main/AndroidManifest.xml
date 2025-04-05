@@ -26,5 +26,8 @@
             android:name="com.buffe.mariokarttimetracker.ui.main.RaceActivity"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".ui.summary.SummaryActivity"
+            android:exported="true" />
     </application>
 </manifest>

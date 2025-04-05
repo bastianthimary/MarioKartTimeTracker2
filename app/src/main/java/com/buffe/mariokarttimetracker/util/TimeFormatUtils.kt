@@ -1,5 +1,7 @@
 package com.buffe.mariokarttimetracker.util
 
+import com.buffe.mariokarttimetracker.ui.main.Run
+
 object TimeFormatUtils {
     fun formatTime(timeMillis: Long): String {
         val minutes = timeMillis / 60000
@@ -47,4 +49,7 @@ object TimeFormatUtils {
             }
         }
     }
+
+    fun calcRunsTotalTime(currentRun: Run) = formatTime(currentRun.races.sumOf { it.raceTime.timeMillis })
+
 }

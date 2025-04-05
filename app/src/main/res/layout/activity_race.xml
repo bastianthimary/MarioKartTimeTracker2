@@ -123,8 +123,9 @@
             </LinearLayout>
         </LinearLayout>
         <!-- Button zur Erfassung per Kamera (Placeholder) -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCameraCapture"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -132,8 +133,9 @@
             android:text="Kamera erfassen" />
 
         <!-- Button, um das aktuelle Rennen zu speichern und zum nächsten zu wechseln -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNextRace"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

@@ -7,7 +7,7 @@ import com.buffe.mariokarttimetracker.data.repository.RaceRepository
 import com.buffe.mariokarttimetracker.data.repository.RunRepository
 import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 
-class RunManager {
+class RunManager  {
     private lateinit var currentRun: Run
     private val runRepository = RunRepository()
     private val raceRepository = RaceRepository()
@@ -16,7 +16,9 @@ class RunManager {
         currentRun = Run()
         return currentRun
     }
-
+    fun getCurrentRun():Run{
+        return currentRun
+    }
     fun getCurrentTrack(): Track {
         return Track.getById(currentRun.currentRaceIndex)
     }
@@ -43,8 +45,9 @@ class RunManager {
     }
 
     fun getCurrentRunTotalTimeFormatted(): String {
-        return TimeFormatUtils.formatTime(currentRun.races.sumOf { it.raceTime.timeMillis })
+        return TimeFormatUtils.calcRunsTotalTime(currentRun)
     }
+
 
     fun getCurrentBestTotalTimeFormatted(): String {
         return TimeFormatUtils.formatTime(runRepository.getBestRunTimeTillTrack(getCurrentTrack().id))
@@ -62,6 +65,7 @@ class RunManager {
     }
 
     fun isFinished(): Boolean {
-        return currentRun.isCompleted()
+       // Hack um Schneller auf Summuary zu kommen return currentRun.currentRaceIndex>=5
+       return currentRun.isCompleted()
     }
 }

@@ -1,6 +1,7 @@
 package com.buffe.mariokarttimetracker.ui.main
 
 import com.buffe.mariokarttimetracker.data.model.Race
+import java.io.Serializable
 
 // Ein kompletter Durchlauf aller 96 Strecken
 data class Run(
@@ -8,7 +9,7 @@ data class Run(
     val startTime: Long = System.currentTimeMillis(),
     val races: MutableList<Race> = mutableListOf<Race>(),
     var currentRaceIndex: Int = 1
-) {
+):Serializable {
     // Startzeit wird automatisch gesetzt
 
 

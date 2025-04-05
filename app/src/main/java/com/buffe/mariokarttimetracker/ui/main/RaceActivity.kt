@@ -1,6 +1,7 @@
 package com.buffe.mariokarttimetracker.ui.main
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
@@ -19,6 +20,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import com.buffe.mariokarttimetracker.ui.summary.SummaryActivity
 import com.buffe.mariokarttimetracker.util.scanner.RaceTextAnalyzer
 import kotlinx.metadata.Visibility
 
@@ -91,7 +93,11 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
 
     private fun updateUI() {
         if(runManager.isFinished()){
-            //TODO: Run Beenden wenn Fertig
+            val intent = Intent(this, SummaryActivity::class.java).apply {
+                putExtra("Run", runManager.getCurrentRun())
+            }
+            startActivity(intent)
+            finish()
         }
         // Hole das aktuelle Rennen vom RunManager
         val currentTrack = runManager.getCurrentTrack()
@@ -144,8 +150,6 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
             }
         }, ContextCompat.getMainExecutor(this))
     }
-
-
     // Diese Methode stoppt die Kamera
     private fun stopCamera() {
         cameraProvider?.unbindAll()

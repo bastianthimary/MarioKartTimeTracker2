@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <!-- Hier können ViewModel-Bindings definiert werden, falls benötigt -->
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/black">
+
+        <!-- Überschrift -->
+        <TextView
+            android:id="@+id/tvCompletionMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Durchlauf Abgeschlossen!"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/titleText"
+            android:gravity="center" />
+
+        <!-- Gesamtzeit des Runs -->
+        <TextView
+            android:id="@+id/tvTotalTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gesamtzeit: 0:00.000"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:layout_marginTop="16dp"
+            android:gravity="center" />
+
+        <!-- Expandable ListView für die einzelnen Rennzeiten -->
+        <ExpandableListView
+            android:id="@+id/expListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="1dp"
+            android:groupIndicator="@null"
+            android:layout_marginTop="16dp" />
+
+        <!-- Button zum Zurückkehren zum Hauptbildschirm -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToMain"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hauptmenü"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
+            <!--app:icon="@drawable/ic_home" Ersetze ic_home durch dein Material Icon -->
+    </LinearLayout>
+</layout>

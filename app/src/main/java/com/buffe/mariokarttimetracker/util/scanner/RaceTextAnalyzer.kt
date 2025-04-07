@@ -9,25 +9,18 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.min
 
 class RaceTextAnalyzer(private val listener: TextResultListener) : ImageAnalysis.Analyzer {
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-    private val timeCache = TimeCache(5) // Speichert die letzten 5 erkannten Zeiten
+
+    // TimeCache als vereinfachte Version beibehalten - hilft bei Stabilisierung der Ergebnisse
+    // zwischen Frames, falls in einem Frame keine Zeit erkannt wird
+    private val lastDetectedTimes = mutableListOf<String>()
+    private val maxCacheSize = 3 // Reduziert auf 3 (war vorher 5)
+
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val processingInProgress = AtomicBoolean(false)
-
-    // Priorität der Bildverarbeitungsmethoden (höherer Wert = höhere Priorität)
-    private val processingPriorities = mapOf(
-        "enhanceContrast" to 3,
-        "isolateYellowText" to 5,    // Gelber Text hat höchste Priorität (typisch für Mario Kart UI)
-        "binarized" to 2,
-        "timeRegion" to 4
-    )
-
-    // Frühe Erkennungsschwelle - nach x erfolgreichen Erkennungen wird die Verarbeitung beendet
-    private val earlyRecognitionThreshold = 2
-    private val successfulRecognitions = AtomicInteger(0)
 
     @SuppressLint("UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
@@ -37,119 +30,72 @@ class RaceTextAnalyzer(private val listener: TextResultListener) : ImageAnalysis
             return
         }
 
-        successfulRecognitions.set(0)
         val bitmap = imageProxy.toBitmap()
 
-        // Verarbeite das Bild mit mehreren Methoden, aber priorisiere sie
-        val processedImagesMap = ImageProcessingUtils.createProcessedVersionsWithNames(bitmap)
-
-        // Sortiere nach Priorität
-        val sortedImages = processedImagesMap.entries.sortedByDescending {
-            processingPriorities[it.key] ?: 0
-        }
-
-        val totalImages = sortedImages.size
-        val processedCount = AtomicInteger(0)
-        val foundValidTime = AtomicBoolean(false)
+        // Verarbeite das Bild - jetzt mit nur einer optimierten Version
+        val processedBitmap = ImageProcessingUtils.createProcessedVersionsWithNames(bitmap)
 
         // Job für die Überwachung und Zeitbegrenzung
         var timeoutJob: Job? = null
-
-        // Liste von Jobs für die Parallelverarbeitung
-        val jobs = mutableListOf<Job>()
+        val foundValidTime = AtomicBoolean(false)
 
         timeoutJob = coroutineScope.launch {
-            // Timeout nach 500ms - liefere bestes Ergebnis aus dem Cache
-            delay(500)
-            if (!foundValidTime.get() && !isActive.not()) {
+            // Timeout nach 300ms (reduziert von 500ms, da wir nur eine Verarbeitung haben)
+            delay(300)
+            if (!foundValidTime.get() && isActive) {
                 Log.d("RaceTextAnalyzer", "Processing timeout reached, using cached result")
-                val cachedTime = timeCache.getMostFrequentTime()
+                val cachedTime = getMostFrequentTime()
                 if (cachedTime != null) {
                     listener.onTextRecognized(cachedTime)
                     foundValidTime.set(true)
                 }
-                // Alle laufenden Jobs abbrechen
-                jobs.forEach { it.cancel() }
                 // ImageProxy schließen
                 imageProxy.close()
                 processingInProgress.set(false)
             }
         }
 
-        // Für jede Bildvariante OCR parallel durchführen
-        for ((methodName, processedBitmap) in sortedImages) {
-            val job = coroutineScope.launch {
-                try {
-                    val image = InputImage.fromBitmap(processedBitmap, imageProxy.imageInfo.rotationDegrees)
+        // OCR auf dem verarbeiteten Bild durchführen
+        coroutineScope.launch {
+            try {
+                val image = InputImage.fromBitmap(processedBitmap, imageProxy.imageInfo.rotationDegrees)
 
-                    // Wenn bereits eine gültige Zeit gefunden wurde und wir das Limit erreicht haben, abbrechen
-                    if (foundValidTime.get() && successfulRecognitions.get() >= earlyRecognitionThreshold) {
-                        return@launch
-                    }
+                recognizer.process(image)
+                    .addOnSuccessListener { visionText ->
+                        Log.i("RaceTextAnalyzer", "Raw text detected: ${visionText.text}")
 
-                    recognizer.process(image)
-                        .addOnSuccessListener { visionText ->
-                            val currentCount = processedCount.incrementAndGet()
-                            Log.d("RaceTextAnalyzer", "Raw text detected ($methodName ${currentCount}/${totalImages}): ${visionText.text}")
+                        // Nur weitermachen, wenn noch keine Zeit erkannt wurde
+                        if (foundValidTime.get()) {
+                            return@addOnSuccessListener
+                        }
 
-                            // Wenn bereits eine gültige Zeit gefunden wurde und wir den Schwellenwert erreicht haben, nichts tun
-                            if (foundValidTime.get() && successfulRecognitions.get() >= earlyRecognitionThreshold) {
-                                return@addOnSuccessListener
+                        // Text verarbeiten
+                        val fullText = StringBuilder()
+                        visionText.textBlocks.forEach { block ->
+                            block.lines.forEach { line ->
+                                fullText.append(line.text).append(" ")
                             }
+                        }
 
-                            // Text verarbeiten
-                            val fullText = StringBuilder()
-                            visionText.textBlocks.forEach { block ->
-                                block.lines.forEach { line ->
-                                    fullText.append(line.text).append(" ")
-                                }
-                            }
+                        val correctedText = correctOcrErrors(fullText.toString()).replace(" ", "")
+                        var formattedText = correctTimeFormat(correctedText)
 
-                            val correctedText = correctOcrErrors(fullText.toString()).replace(" ", "")
+                        // 1. Suche nach vollständigem Zeitmuster
+                        var bestMatch = findTimePattern(formattedText)
 
-                            // 1. Suche nach vollständigem Zeitmuster
-                            var bestMatch = findTimePattern(correctedText)
+                        // 2. Wenn keine vollständige Zeit gefunden, versuche partielle Zeitformate zu erkennen
+                        if (bestMatch.isEmpty()) {
+                            bestMatch = findPartialTimePattern(correctedText)
+                        }
 
-                            // 2. Wenn keine vollständige Zeit gefunden, versuche partielle Zeitformate zu erkennen
-                            if (bestMatch.isEmpty()) {
-                                bestMatch = findPartialTimePattern(correctedText)
-                            }
+                        // 3. Wenn eine Zeit gefunden wurde
+                        if (bestMatch.isNotEmpty()) {
+                            addTimeToCache(bestMatch)
 
-                            // 3. Wenn eine Zeit gefunden wurde
-                            if (bestMatch.isNotEmpty()) {
-                                timeCache.addTime(bestMatch)
-                                successfulRecognitions.incrementAndGet()
-
-                                // Wenn wir genug Bestätigungen haben oder dies die höchste Prioritätsmethode war
-                                if (successfulRecognitions.get() >= earlyRecognitionThreshold ||
-                                    processingPriorities[methodName] == sortedImages.first().let { processingPriorities[it.key] }) {
-
-                                    // Nur weitermachen, wenn wir noch keine Zeit zurückgegeben haben
-                                    if (!foundValidTime.getAndSet(true)) {
-                                        Log.d("RaceTextAnalyzer", "Found valid time early: $bestMatch (method: $methodName)")
-                                        listener.onTextRecognized(bestMatch)
-
-                                        // Timeout-Job abbrechen
-                                        timeoutJob?.cancel()
-
-                                        // Ressourcen freigeben
-                                        imageProxy.close()
-                                        processingInProgress.set(false)
-                                        return@addOnSuccessListener
-                                    }
-                                }
-                            }
-
-                            // Prüfen, ob alle Bilder verarbeitet wurden
-                            if (currentCount == totalImages && !foundValidTime.get()) {
-                                val cachedTime = timeCache.getMostFrequentTime()
-                                if (cachedTime != null) {
-                                    foundValidTime.set(true)
-                                    listener.onTextRecognized(cachedTime)
-                                } else {
-                                    foundValidTime.set(true)
-                                    listener.onTextRecognized("")
-                                }
+                            // Nur weitermachen, wenn wir noch keine Zeit zurückgegeben haben
+                            if (!foundValidTime.getAndSet(true)) {
+                                Log.d("RaceTextAnalyzer", "Found valid time: $bestMatch")
+                                listener.onTextRecognized(bestMatch)
 
                                 // Timeout-Job abbrechen
                                 timeoutJob?.cancel()
@@ -157,35 +103,78 @@ class RaceTextAnalyzer(private val listener: TextResultListener) : ImageAnalysis
                                 // Ressourcen freigeben
                                 imageProxy.close()
                                 processingInProgress.set(false)
+                                return@addOnSuccessListener
+                            }
+                        } else {
+                            // Wenn keine Zeit erkannt wurde, prüfe den Cache
+                            val cachedTime = getMostFrequentTime()
+                            if (cachedTime != null && !foundValidTime.getAndSet(true)) {
+                                listener.onTextRecognized(cachedTime)
+                            } else if (!foundValidTime.getAndSet(true)) {
+                                listener.onTextRecognized("")
+                            }
+
+                            // Timeout-Job abbrechen
+                            timeoutJob?.cancel()
+
+                            // Ressourcen freigeben
+                            imageProxy.close()
+                            processingInProgress.set(false)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("RaceTextAnalyzer", "Text recognition failed", e)
+
+                        // Wenn keine Zeit erkannt wurde, prüfe den Cache
+                        if (!foundValidTime.getAndSet(true)) {
+                            val cachedTime = getMostFrequentTime()
+                            if (cachedTime != null) {
+                                listener.onTextRecognized(cachedTime)
+                            } else {
+                                listener.onTextRecognized("")
                             }
                         }
-                        .addOnFailureListener { e ->
-                            val currentCount = processedCount.incrementAndGet()
-                            Log.e("RaceTextAnalyzer", "Text recognition failed for method $methodName", e)
 
-                            // Prüfen, ob alle Bilder verarbeitet wurden
-                            if (currentCount == totalImages && !foundValidTime.get()) {
-                                val cachedTime = timeCache.getMostFrequentTime()
-                                if (cachedTime != null) {
-                                    foundValidTime.set(true)
-                                    listener.onTextRecognized(cachedTime)
-                                } else {
-                                    foundValidTime.set(true)
-                                    listener.onTextRecognized("")
-                                }
+                        // Ressourcen freigeben
+                        imageProxy.close()
+                        processingInProgress.set(false)
+                    }
+            } catch (e: Exception) {
+                Log.e("RaceTextAnalyzer", "Error processing image", e)
 
-                                // Ressourcen freigeben
-                                imageProxy.close()
-                                processingInProgress.set(false)
-                            }
-                        }
-                } catch (e: Exception) {
-                    Log.e("RaceTextAnalyzer", "Error processing image with method $methodName", e)
-                    processedCount.incrementAndGet()
+                if (!foundValidTime.getAndSet(true)) {
+                    val cachedTime = getMostFrequentTime()
+                    if (cachedTime != null) {
+                        listener.onTextRecognized(cachedTime)
+                    } else {
+                        listener.onTextRecognized("")
+                    }
                 }
+
+                // Ressourcen freigeben
+                imageProxy.close()
+                processingInProgress.set(false)
             }
-            jobs.add(job)
         }
+    }
+
+    // Vereinfachte Cache-Funktionen für die letzten erkannten Zeiten
+    private fun addTimeToCache(time: String) {
+        // Füge die Zeit vorne in die Liste ein
+        lastDetectedTimes.add(0, time)
+
+        // Halte die Liste auf maximaler Größe
+        if (lastDetectedTimes.size > maxCacheSize) {
+            lastDetectedTimes.removeAt(lastDetectedTimes.size - 1)
+        }
+    }
+
+    private fun getMostFrequentTime(): String? {
+        if (lastDetectedTimes.isEmpty()) return null
+
+        // Vereinfachte Implementierung: Gib die zuletzt erkannte Zeit zurück
+        // Für eine robustere Implementierung könnte man hier die häufigste Zeit bestimmen
+        return lastDetectedTimes.firstOrNull()
     }
 
     // Die restlichen Methoden bleiben unverändert
@@ -295,21 +284,82 @@ class RaceTextAnalyzer(private val listener: TextResultListener) : ImageAnalysis
     }
 }
 
-// Hilfklasse zum Zwischenspeichern der erkannten Zeiten
-class TimeCache(private val maxSize: Int) {
-    private val times = LinkedHashMap<String, Int>()
+/**
+ * Korrigiert häufige OCR-Fehler bei Zeitformaten, insbesondere fehlende Doppelpunkte
+ * Format sollte immer sein: 1 Ziffer, dann ':', dann 2 Ziffern, dann '.', dann 3 Ziffern
+ */
+fun correctTimeFormat(detectedText: String): String {
+    // Zuerst alle Leerzeichen und unerwünschten Zeichen entfernen
+    var text = detectedText.replace(" ", "").trim()
 
-    fun addTime(time: String) {
-        times[time] = (times[time] ?: 0) + 1
+    // Typische OCR-Fehler korrigieren (z.B. O->0, l->1)
+    text = text.replace("O", "0").replace("o", "0")
+        .replace("l", "1").replace("I", "1").replace("i", "1").replace("|", "1")
+        .replace(",", ".")
 
-        // Cache-Größe begrenzen
-        if (times.size > maxSize) {
-            val oldestEntry = times.entries.first()
-            times.remove(oldestEntry.key)
+    // Prüfe ob das Format bereits korrekt ist: #:##.###
+    val correctPattern = Regex("^\\d:\\d{2}\\.\\d{3}$")
+    if (correctPattern.matches(text)) {
+        return text
+    }
+
+    // Wenn der Text nur Ziffern und einen Punkt enthält (z.B. "124.955")
+    val digitsAndDotPattern = Regex("^(\\d+)\\.(\\d+)$")
+    val digitsAndDotMatch = digitsAndDotPattern.find(text)
+
+    if (digitsAndDotMatch != null) {
+        val beforeDot = digitsAndDotMatch.groupValues[1]
+        val afterDot = digitsAndDotMatch.groupValues[2]
+
+        // Wenn vor dem Punkt genau 3 Ziffern stehen, formatiere zu #:##.###
+        if (beforeDot.length == 3) {
+            val minutes = beforeDot[0].toString()
+            val seconds = beforeDot.substring(1, 3)
+
+            // Stellen Sie sicher, dass genau 3 Nachkommastellen vorhanden sind
+            val milliseconds = if (afterDot.length >= 3) {
+                afterDot.substring(0, 3)
+            } else {
+                // Wenn weniger als 3 Nachkommastellen, füge 0en hinzu
+                afterDot.padEnd(3, '0')
+            }
+
+            return "$minutes:$seconds.$milliseconds"
         }
     }
 
-    fun getMostFrequentTime(): String? {
-        return times.entries.maxByOrNull { it.value }?.key
+    // Wenn der Text nur Ziffern enthält (z.B. "124955")
+    val onlyDigitsPattern = Regex("^(\\d+)$")
+    val onlyDigitsMatch = onlyDigitsPattern.find(text)
+
+    if (onlyDigitsMatch != null && text.length >= 6) {
+        // Format wäre: 1 Ziffer für Minuten, 2 Ziffern für Sekunden, 3 Ziffern für Millisekunden
+        val digits = onlyDigitsMatch.groupValues[1]
+
+        if (digits.length >= 6) {
+            val minutes = digits[0].toString()
+            val seconds = digits.substring(1, 3)
+            val milliseconds = digits.substring(3, min(digits.length, 6))
+
+            return "$minutes:$seconds.$milliseconds"
+        }
     }
+
+    // Wenn wir nur eine partielle Zeit haben (z.B. nur "124"), versuchen wir zu rekonstruieren
+    if (text.length >= 3 && text.all { it.isDigit() }) {
+        // Wenn wir nur Ziffern haben, nehmen wir an:
+        // 1. Ziffer = Minuten, nächste 2 = Sekunden, Rest (falls vorhanden) = Millisekunden
+        val minutes = text[0].toString()
+        val seconds = text.substring(1, min(text.length, 3))
+        val milliseconds = if (text.length > 3) {
+            text.substring(3, min(text.length, 6))
+        } else {
+            "000" // Standard-Millisekunden, wenn keine angegeben sind
+        }
+
+        return "$minutes:$seconds." + milliseconds.padEnd(3, '0')
+    }
+
+    // Wenn nichts passt, gib den Originaltext zurück
+    return text
 }

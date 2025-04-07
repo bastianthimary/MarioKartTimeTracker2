@@ -1,28 +1,38 @@
 package com.buffe.mariokarttimetracker.ui.main
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.buffe.mariokarttimetracker.databinding.ActivityRaceBinding
-import com.buffe.mariokarttimetracker.util.TimeFormatUtils
-import com.buffe.mariokarttimetracker.util.TimeFormatUtils.isValidTimeFormat
-import com.buffe.mariokarttimetracker.util.scanner.TextResultListener
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.buffe.mariokarttimetracker.databinding.ActivityRaceBinding
 import com.buffe.mariokarttimetracker.ui.summary.SummaryActivity
+import com.buffe.mariokarttimetracker.util.TimeFormatUtils
+import com.buffe.mariokarttimetracker.util.TimeFormatUtils.isValidTimeFormat
 import com.buffe.mariokarttimetracker.util.scanner.RaceTextAnalyzer
-import kotlinx.metadata.Visibility
+import com.buffe.mariokarttimetracker.util.scanner.TextResultListener
+import java.util.concurrent.Executors
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import android.hardware.camera2.CameraCharacteristics
+import android.os.Build
+import android.widget.SeekBar
+import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 
 
 class RaceActivity : AppCompatActivity(), TextResultListener {
@@ -30,13 +40,35 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
     private lateinit var binding: ActivityRaceBinding
     private var isFormatting = false
     private var cameraProvider: ProcessCameraProvider? = null // Instanzvariable zum Speichern des Providers
+    private var camera: Camera? = null
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
+    private var currentZoomRatio = 1.0f
     private val runManager = RunManager()
+    // Zoom-Konfiguration
+    private var minZoomRatio = 1.0f
+    private var maxZoomRatio = 1.0f
+    @SuppressLint("ClickableViewAccessibility")
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRaceBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        // Prüfe Berechtigungen und starte Kameravorschau
 
+
+        // Zoom-Gesten-Initialisierung
+        scaleGestureDetector = ScaleGestureDetector(this, ScaleListener())
+        binding.previewView.setOnTouchListener { _, event ->
+            scaleGestureDetector.onTouchEvent(event)
+            true
+        }
+        binding.zoomSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val zoomRatio = minZoomRatio + (maxZoomRatio - minZoomRatio) * (progress / 100f)
+                camera?.cameraControl?.setZoomRatio(zoomRatio)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
         // Lade den aktuellen Run; falls keiner offen ist, wird automatisch ein neuer gestartet.
         runManager.initializeOrContinueCurrentRun()
 
@@ -119,44 +151,87 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun startCamera() {
         binding.previewView.visibility = View.VISIBLE
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             // CameraProvider erhalten
             cameraProvider = cameraProviderFuture.get()
-            // Preview Use-Case erstellen und binden
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.previewView.surfaceProvider)
-            }
-            // ImageAnalysis-UseCase einrichten
-            val imageAnalysis = ImageAnalysis.Builder()
-                .build()
-                .also {
-                    it.setAnalyzer(ContextCompat.getMainExecutor(this), RaceTextAnalyzer(this))
-                }
+           bindCameraUseCases()
 
-            // Wähle die Rückkamera aus
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            try {
-                // Vorherige UseCases binden (falls nötig)
-                cameraProvider?.unbindAll()
-
-                // Binde den ImageAnalysis-UseCase
-                cameraProvider?.bindToLifecycle(this, cameraSelector,preview, imageAnalysis)
-            } catch (exc: Exception) {
-                Log.e("RaceActivity", "Use case binding failed", exc)
-            }
         }, ContextCompat.getMainExecutor(this))
     }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun bindCameraUseCases() {
+        val preview = Preview.Builder().build().also {
+            it.setSurfaceProvider(binding.previewView.surfaceProvider)
+        }
+
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+            .also {
+                it.setAnalyzer(Executors.newSingleThreadExecutor(), RaceTextAnalyzer(this))
+            }
+
+        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+        try {
+            cameraProvider?.unbindAll()
+            camera = cameraProvider?.bindToLifecycle(
+                this,
+                cameraSelector,
+                preview,
+                imageAnalysis
+            )
+
+            // Zoom-Bereich initialisieren
+            camera?.cameraInfo?.let { cameraInfo ->
+                // Konvertiere CameraX-Info zu Camera2-Charakteristiken
+                val camera2Info = Camera2CameraInfo.from(cameraInfo)
+
+                // Holen der Camera2-Charakteristiken
+                val characteristics = camera2Info.getCameraCharacteristic(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE)
+
+                // Für Android API 30+ (präziser Zoom)
+                val zoomRatioRange = characteristics?.let {
+                    camera2Info.getCameraCharacteristic(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE)
+                }
+
+                // Für ältere Android Versionen (digitaler Zoom)
+                if (zoomRatioRange == null) {
+                    val maxDigitalZoom = camera2Info.getCameraCharacteristic(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM) ?: 1.0f
+                    minZoomRatio = 1.0f
+                    maxZoomRatio = maxDigitalZoom
+                } else {
+                    minZoomRatio = zoomRatioRange.lower
+                    maxZoomRatio = zoomRatioRange.upper
+                }
+            }
+        } catch (exc: Exception) {
+            Log.e("RaceActivity", "Use case binding failed", exc)
+        }
+    }
+
     // Diese Methode stoppt die Kamera
     private fun stopCamera() {
         cameraProvider?.unbindAll()
         cameraProvider = null
         binding.previewView.visibility = View.GONE
     }
-
+    // Zoom-Gesten-Listener
+    private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val scaleFactor = detector.scaleFactor
+            currentZoomRatio = currentZoomRatio * scaleFactor
+            currentZoomRatio = currentZoomRatio.coerceIn(minZoomRatio, maxZoomRatio)
+            camera?.cameraControl?.setZoomRatio(currentZoomRatio)
+            return true
+        }
+    }
     // Implementierung des Callback-Interfaces: hier den erkannten Text in das Textfeld eintragen
     override fun onTextRecognized(result: String) {
         runOnUiThread {
@@ -171,6 +246,8 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
+
+
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10

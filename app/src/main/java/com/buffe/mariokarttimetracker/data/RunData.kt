@@ -2,8 +2,8 @@ package com.buffe.mariokarttimetracker.data
 
 import com.buffe.mariokarttimetracker.data.model.Race
 import com.buffe.mariokarttimetracker.data.model.Track
-import com.buffe.mariokarttimetracker.ui.main.RaceTime
-import com.buffe.mariokarttimetracker.ui.main.Run
+import com.buffe.mariokarttimetracker.data.model.RaceTime
+import com.buffe.mariokarttimetracker.data.model.Run
 
 
 object RunData {

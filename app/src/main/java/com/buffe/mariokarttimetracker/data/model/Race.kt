@@ -1,7 +1,6 @@
 package com.buffe.mariokarttimetracker.data.model
 
 
-import com.buffe.mariokarttimetracker.ui.main.RaceTime
 import java.io.Serializable
 
 

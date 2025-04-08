@@ -1,7 +1,7 @@
 package com.buffe.mariokarttimetracker.data.mapper
 
 import com.buffe.mariokarttimetracker.data.database.entity.RunEntity
-import com.buffe.mariokarttimetracker.ui.main.Run
+import com.buffe.mariokarttimetracker.data.model.Run
 
 object RunMapper {
     fun toDomain(runEntity: RunEntity): Run {

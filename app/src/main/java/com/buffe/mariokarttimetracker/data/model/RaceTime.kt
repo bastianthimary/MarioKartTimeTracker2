@@ -1,4 +1,4 @@
-package com.buffe.mariokarttimetracker.ui.main
+package com.buffe.mariokarttimetracker.data.model
 
 import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 import java.io.Serializable

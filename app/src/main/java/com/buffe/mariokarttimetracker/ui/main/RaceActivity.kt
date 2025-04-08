@@ -33,6 +33,9 @@ import android.widget.SeekBar
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import com.buffe.mariokarttimetracker.data.manager.RunManager
+import com.buffe.mariokarttimetracker.data.manager.StatisticManager
+import com.buffe.mariokarttimetracker.data.model.RaceTime
 
 
 class RaceActivity : AppCompatActivity(), TextResultListener {
@@ -44,6 +47,7 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
     private lateinit var scaleGestureDetector: ScaleGestureDetector
     private var currentZoomRatio = 1.0f
     private val runManager = RunManager()
+    private val statisticManager=StatisticManager()
     // Zoom-Konfiguration
     private var minZoomRatio = 1.0f
     private var maxZoomRatio = 1.0f
@@ -118,7 +122,7 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
     }
 
     private fun calcYourTimeNow(): String {
-      val totalTimeBeforeRace= TimeFormatUtils.parseTime(runManager.getCurrentRunTotalTimeFormatted())
+      val totalTimeBeforeRace= TimeFormatUtils.parseTime(statisticManager.getCurrentRunTotalTimeFormatted(runManager.getCurrentRun()))
         val yourTimeNowInMs=totalTimeBeforeRace+TimeFormatUtils.parseTime(binding.etRaceTime.text.toString())
         return TimeFormatUtils.formatTime(yourTimeNowInMs)
     }
@@ -135,15 +139,15 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
         val currentTrack = runManager.getCurrentTrack()
         supportActionBar?.title = currentTrack.displayName
         // Aktualisiere aggregierte Zeiten (Gesamtzeit bis zur aktuellen Strecke, beste und durchschnittliche Zeit)
-        binding.tvRunTotalTime.text = "Gesamtzeit: ${runManager.getCurrentRunTotalTimeFormatted()}"
-        binding.tvBestTime.text = "Beste Zeit: ${runManager.getCurrentBestTotalTimeFormatted()}"
-        binding.tvAverageTime.text = "Durchschnitt: ${runManager.getCurrentAverageTotalTimeFormatted()}"
+        binding.tvRunTotalTime.text = "Gesamtzeit: ${statisticManager.getCurrentRunTotalTimeFormatted(runManager.getCurrentRun())}"
+        binding.tvBestTime.text = "Beste Zeit: ${statisticManager.getCurrentBestTotalTimeFormatted(runManager.getCurrentTrack().id)}"
+        binding.tvAverageTime.text = "Durchschnitt: ${statisticManager.getAverageTotalTimeFormattedBeforeCurrent(runManager.getCurrentTrack().id)}"
 
         // Leere das Eingabefeld, falls vorhanden
         binding.etRaceTime.text?.clear()
         //Aktualisiere Historische Strecken Zeiten Durchschnitt und Bestzeiten
-        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${runManager.getCurrentBestTrackTimeFormatted()}"
-        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${runManager.getCurrentAverageTrackTimeFormatted()}"
+        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${statisticManager.getCurrentBestTrackTimeFormatted(runManager.getCurrentTrack().id)}"
+        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${statisticManager.getCurrentAverageTrackTimeFormatted(runManager.getCurrentTrack().id)}"
 
         // Aktivieren/Deaktivieren des "Nächstes Rennen"-Buttons
         binding.btnNextRace.isEnabled =

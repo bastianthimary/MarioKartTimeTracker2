@@ -6,11 +6,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 
 import androidx.appcompat.app.AppCompatActivity
-import com.buffe.mariokarttimetracker.data.model.Track
 import com.buffe.mariokarttimetracker.databinding.ActivitySummaryBinding
 import com.buffe.mariokarttimetracker.ui.main.MainActivity
-import com.buffe.mariokarttimetracker.ui.main.RaceTime
-import com.buffe.mariokarttimetracker.ui.main.Run
+import com.buffe.mariokarttimetracker.data.model.Run
 import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 
 

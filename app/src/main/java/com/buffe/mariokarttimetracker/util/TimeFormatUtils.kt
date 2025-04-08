@@ -1,6 +1,6 @@
 package com.buffe.mariokarttimetracker.util
 
-import com.buffe.mariokarttimetracker.ui.main.Run
+import com.buffe.mariokarttimetracker.data.model.Run
 
 object TimeFormatUtils {
     fun formatTime(timeMillis: Long): String {

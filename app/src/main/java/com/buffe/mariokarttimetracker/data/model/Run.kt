@@ -1,6 +1,5 @@
-package com.buffe.mariokarttimetracker.ui.main
+package com.buffe.mariokarttimetracker.data.model
 
-import com.buffe.mariokarttimetracker.data.model.Race
 import java.io.Serializable
 
 // Ein kompletter Durchlauf aller 96 Strecken

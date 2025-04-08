@@ -4,8 +4,7 @@ import com.buffe.mariokarttimetracker.data.database.entity.RaceEntity
 import com.buffe.mariokarttimetracker.data.database.entity.RunEntity
 import com.buffe.mariokarttimetracker.data.model.Race
 import com.buffe.mariokarttimetracker.data.model.Track
-import com.buffe.mariokarttimetracker.ui.main.RaceTime
-import com.buffe.mariokarttimetracker.ui.main.Run
+import com.buffe.mariokarttimetracker.data.model.RaceTime
 
 object RaceMapper {
     fun toDomain(entity: RaceEntity): Race {

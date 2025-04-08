@@ -7,7 +7,7 @@ import com.buffe.mariokarttimetracker.data.database.entity.RunEntity
 import com.buffe.mariokarttimetracker.data.database.entity.RunEntity_
 import com.buffe.mariokarttimetracker.data.mapper.RaceMapper
 import com.buffe.mariokarttimetracker.data.mapper.RunMapper
-import com.buffe.mariokarttimetracker.ui.main.Run
+import com.buffe.mariokarttimetracker.data.model.Run
 import io.objectbox.Box
 import io.objectbox.kotlin.query
 import kotlinx.coroutines.CoroutineScope

@@ -1,22 +1,22 @@
-package com.buffe.mariokarttimetracker.ui.main
+package com.buffe.mariokarttimetracker.data.manager
 
 
 import com.buffe.mariokarttimetracker.data.model.Race
+import com.buffe.mariokarttimetracker.data.model.RaceTime
+import com.buffe.mariokarttimetracker.data.model.Run
 import com.buffe.mariokarttimetracker.data.model.Track
-import com.buffe.mariokarttimetracker.data.repository.RaceRepository
 import com.buffe.mariokarttimetracker.data.repository.RunRepository
-import com.buffe.mariokarttimetracker.util.TimeFormatUtils
 
 class RunManager  {
     private lateinit var currentRun: Run
     private val runRepository = RunRepository()
-    private val raceRepository = RaceRepository()
     private val MAX_NUMBER_OF_RACES=96
+
     fun startNewRun(): Run {
         currentRun = Run()
         return currentRun
     }
-    fun getCurrentRun():Run{
+    fun getCurrentRun(): Run {
         return currentRun
     }
     fun getCurrentTrack(): Track {
@@ -44,25 +44,7 @@ class RunManager  {
         }
     }
 
-    fun getCurrentRunTotalTimeFormatted(): String {
-        return TimeFormatUtils.calcRunsTotalTime(currentRun)
-    }
 
-
-    fun getCurrentBestTotalTimeFormatted(): String {
-        return TimeFormatUtils.formatTime(runRepository.getBestRunTimeTillTrack(getCurrentTrack().id))
-    }
-
-    fun getCurrentAverageTotalTimeFormatted(): String {
-        return TimeFormatUtils.formatTime(runRepository.getAverageRunTimeTillTrack(getCurrentTrack().id))
-    }
-    fun getCurrentBestTrackTimeFormatted(): String {
-        return TimeFormatUtils.formatTime(raceRepository.getBestRaceTimeOfTrack(getCurrentTrack().id))
-    }
-
-    fun getCurrentAverageTrackTimeFormatted(): String {
-        return TimeFormatUtils.formatTime(raceRepository.getAverageRaceTimeOfTrack(getCurrentTrack().id))
-    }
 
     fun isFinished(): Boolean {
        // Hack um Schneller auf Summuary zu kommen return currentRun.currentRaceIndex>=5

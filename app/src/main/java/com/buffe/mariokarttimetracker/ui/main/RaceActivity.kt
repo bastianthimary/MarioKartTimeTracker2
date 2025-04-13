@@ -30,9 +30,11 @@ import androidx.camera.camera2.interop.Camera2CameraInfo
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import com.buffe.mariokarttimetracker.R
 import com.buffe.mariokarttimetracker.data.manager.RunManager
 import com.buffe.mariokarttimetracker.data.manager.StatisticManager
 import com.buffe.mariokarttimetracker.data.model.RaceTime
@@ -127,6 +129,7 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
         return TimeFormatUtils.formatTime(yourTimeNowInMs)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateUI() {
         if(runManager.isFinished()){
             val intent = Intent(this, SummaryActivity::class.java).apply {
@@ -140,21 +143,38 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
         supportActionBar?.title = currentTrack.displayName
         // Aktualisiere aggregierte Zeiten (Gesamtzeit bis zur aktuellen Strecke, beste und durchschnittliche Zeit)
         binding.tvRunTotalTime.text = "Gesamtzeit: ${statisticManager.getCurrentRunTotalTimeFormatted(runManager.getCurrentRun())}"
-        binding.tvBestTime.text = "Beste Zeit: ${statisticManager.getCurrentBestTotalTimeFormatted(runManager.getCurrentTrack().id)}"
-        binding.tvAverageTime.text = "Durchschnitt: ${statisticManager.getAverageTotalTimeFormattedBeforeCurrent(runManager.getCurrentTrack().id)}"
+        binding.tvCurrenRank.text= "Aktuelle Platzierung:${statisticManager.determineRankOfCurrentRun(runManager.getCurrentRun(),runManager.getCurrentTrack())}"
+        binding.tvBestRunTime.text = "Beste Zeit: ${statisticManager.determineCurrentBestTotalTimeFormatted(runManager.getCurrentTrack().id)}"
+        binding.tvAverageTime.text = "Durchschnitt: ${statisticManager.determineAverageTotalTimeFormattedBeforeCurrent(runManager.getCurrentTrack().id)}"
 
+        determineAndSetRecordTextColor(binding.tvBestRaceTime,statisticManager.currentTotalTime,statisticManager.bestTotalTime)
+        determineAndSetTextColor(binding.tvAverageRaceTime,statisticManager.currentTotalTime,statisticManager.bestTotalTime)
         // Leere das Eingabefeld, falls vorhanden
         binding.etRaceTime.text?.clear()
         //Aktualisiere Historische Strecken Zeiten Durchschnitt und Bestzeiten
-        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${statisticManager.getCurrentBestTrackTimeFormatted(runManager.getCurrentTrack().id)}"
-        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${statisticManager.getCurrentAverageTrackTimeFormatted(runManager.getCurrentTrack().id)}"
+        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${statisticManager.determineCurrentBestTrackTimeFormatted(runManager.getCurrentTrack().id)}"
+        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${statisticManager.determineCurrentAverageTrackTimeFormatted(runManager.getCurrentTrack().id)}"
+        //Aktualisiere die Farben
 
         // Aktivieren/Deaktivieren des "Nächstes Rennen"-Buttons
         binding.btnNextRace.isEnabled =
             false // Beispielweise erst aktivieren, wenn eine gültige Eingabe vorliegt.
     }
-
-
+    private fun determineAndSetTextColor(text:TextView,baseTime:RaceTime,compareTime:RaceTime){
+        if(isCurrentFasterThen(baseTime.timeMillis,compareTime.timeMillis)){
+            text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeBack))
+        }
+        text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeLead))
+    }
+    private fun determineAndSetRecordTextColor(text:TextView,baseTime:RaceTime,compareTime:RaceTime){
+        if(isCurrentFasterThen(baseTime.timeMillis,compareTime.timeMillis)){
+            text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeBack))
+        }
+        text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeRecord))
+    }
+    fun isCurrentFasterThen(currentTime: Long, otherTime: Long): Boolean {
+        return currentTime < otherTime;
+    }
     @RequiresApi(Build.VERSION_CODES.R)
     private fun startCamera() {
         binding.previewView.visibility = View.VISIBLE
@@ -245,13 +265,10 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
             }
         }
     }
-
     // Berechtigungsprüfung
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
-
-
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10

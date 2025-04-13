@@ -42,7 +42,12 @@
             android:layout_marginTop="16dp"
             android:gravity="center"
             android:orientation="horizontal">
-
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/black"
+                android:orientation="vertical"
+                android:padding="16dp">
             <TextView
                 android:id="@+id/tvRunTotalTime"
                 android:layout_width="wrap_content"
@@ -50,7 +55,15 @@
                 android:padding="8dp"
                 android:text="Aktuelle Gesamtzeit: 0:00.000"
                 android:textColor="@color/white" />
+                <TextView
+                android:id="@+id/tvCurrenRank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Aktuelle Platzierung:"
+                android:textColor="@color/white" />
 
+            </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,7 +72,7 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/tvBestTime"
+                    android:id="@+id/tv_best_run_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="8dp"

@@ -25,7 +25,7 @@ class RunRepository {
 
     fun updateRun(run: Run) {
         if(isNewRun(run)){
-            runBox.put(RunMapper.toEntity(run))
+            run.id=runBox.put(RunMapper.toEntity(run))
             return
         }
         val existingEntity = runBox.get(run.id!!)

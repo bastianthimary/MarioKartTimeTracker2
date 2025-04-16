@@ -14,6 +14,9 @@ class MarioKartApp : Application() {
     }
     override fun onCreate() {
         super.onCreate()
+// Lade die OpenCV-Bibliothek
+
+        System.loadLibrary("opencv_java4")
 
         boxStore = MyObjectBox.builder()
             .androidContext(this).build()

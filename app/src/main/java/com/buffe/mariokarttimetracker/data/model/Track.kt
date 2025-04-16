@@ -31,47 +31,48 @@ enum class Track( val id: Int,  // Eindeutige ID für die Strecke
     BOWSERS_FESTUNG(15, "Bowsers Festung"),
     REGENBOGEN_BOULEVARD(16, "Regenbogen-Boulevard"),
 
-    // Panzer-Cup
-    KUHMUH_WEIDE_WII(17, "Kuhmuh-Weide (Wii)"),
-    MARIOS_PISTE_GBA(18, "Marios Piste (GBA)"),
-    CHEEP_CHEEP_STRAND_DS(19, "Cheep-Cheep-Strand (DS)"),
-    TOADS_AUTOBAHN_N64(20, "Toads Autobahn (N64)"),
-
-    // Bananen-Cup
-    STAUBTROCKENE_WUSTE_GCN(21, "Staubtrockene Wüste (GCN)"),
-    DONUT_EBENE_3_SNES(22, "Donut-Ebene 3 (SNES)"),
-    KONIGLICHE_RENNPISTE_N64(23, "Königliche Rennpiste (N64)"),
-    DK_DSCHUNGEL_3DS(24, "DK Dschungel (3DS)"),
-
-    // Blatt-Cup
-    WARIO_ARENA_DS(25, "Wario-Arena (DS)"),
-    SORBET_LAND_GCN(26, "Sorbet-Land (GCN)"),
-    INSTRUMENTALPISTE_3DS(27, "Instrumentalpiste (3DS)"),
-    YOSHI_TAL_N64(28, "Yoshi-Tal (N64)"),
-
-    // Blitz-Cup
-    TICK_TACK_TRAUMA_DS(29, "Tick-Tack-Trauma (DS)"),
-    ROHRENRASEREI_3DS(30, "Röhrenraserei (3DS)"),
-    VULKANGROLLEN_WII(31, "Vulkangrollen (Wii)"),
-    REGENBOGEN_BOULEVARD_N64(32, "Regenbogen-Boulevard (N64)"),
-
     // Ei-Cup (DLC 1)
-    YOSHIS_PISTE_GCN(33, "Yoshis Piste (GCN)"),
-    EXCITEBIKE_STADION(34, "Excitebike-Stadion"),
-    GROSSE_DRACHENMAUER(35, "Große Drachenmauer"),
-    MUTE_CITY(36, "Mute City"),
-
-    // Triforce-Cup (DLC 1)
-    WARIOS_GOLDMINE_WII(37, "Warios Goldmine (Wii)"),
-    REGENBOGEN_BOULEVARD_SNES(38, "Regenbogen-Boulevard (SNES)"),
-    POLARKREIS_PARCOURS(39, "Polarkreis-Parcours"),
-    HYRULE_PISTE(40, "Hyrule-Piste"),
+    YOSHIS_PISTE_GCN(17, "Yoshis Piste (GCN)"),
+    EXCITEBIKE_STADION(18, "Excitebike-Stadion"),
+    GROSSE_DRACHENMAUER(19, "Große Drachenmauer"),
+    MUTE_CITY(20, "Mute City"),
 
     // Crossing-Cup (DLC 2)
-    BABY_PARK_GCN(41, "Baby-Park (GCN)"),
-    KASELAND_GBA(42, "Käseland (GBA)"),
-    WILDER_WIPFELWEG(43, "Wilder Wipfelweg"),
-    ANIMAL_CROSSING_DORF(44, "Animal Crossing Dorf"),
+    BABY_PARK_GCN(21, "Baby-Park (GCN)"),
+    KASELAND_GBA(22, "Käseland (GBA)"),
+    WILDER_WIPFELWEG(23, "Wilder Wipfelweg"),
+    ANIMAL_CROSSING_DORF(24, "Animal Crossing Dorf"),
+    // Panzer-Cup
+    KUHMUH_WEIDE_WII(25, "Kuhmuh-Weide (Wii)"),
+    MARIOS_PISTE_GBA(26, "Marios Piste (GBA)"),
+    CHEEP_CHEEP_STRAND_DS(27, "Cheep-Cheep-Strand (DS)"),
+    TOADS_AUTOBAHN_N64(28, "Toads Autobahn (N64)"),
+
+    // Bananen-Cup
+    STAUBTROCKENE_WUSTE_GCN(29, "Staubtrockene Wüste (GCN)"),
+    DONUT_EBENE_3_SNES(30, "Donut-Ebene 3 (SNES)"),
+    KONIGLICHE_RENNPISTE_N64(31, "Königliche Rennpiste (N64)"),
+    DK_DSCHUNGEL_3DS(32, "DK Dschungel (3DS)"),
+
+    // Blatt-Cup
+    WARIO_ARENA_DS(33, "Wario-Arena (DS)"),
+    SORBET_LAND_GCN(34, "Sorbet-Land (GCN)"),
+    INSTRUMENTALPISTE_3DS(35, "Instrumentalpiste (3DS)"),
+    YOSHI_TAL_N64(36, "Yoshi-Tal (N64)"),
+
+    // Blitz-Cup
+    TICK_TACK_TRAUMA_DS(37, "Tick-Tack-Trauma (DS)"),
+    ROHRENRASEREI_3DS(38, "Röhrenraserei (3DS)"),
+    VULKANGROLLEN_WII(39, "Vulkangrollen (Wii)"),
+    REGENBOGEN_BOULEVARD_N64(40, "Regenbogen-Boulevard (N64)"),
+
+    // Triforce-Cup (DLC 1)
+    WARIOS_GOLDMINE_WII(41, "Warios Goldmine (Wii)"),
+    REGENBOGEN_BOULEVARD_SNES(42, "Regenbogen-Boulevard (SNES)"),
+    POLARKREIS_PARCOURS(43, "Polarkreis-Parcours"),
+    HYRULE_PISTE(44, "Hyrule-Piste"),
+
+
 
     // Glocken-Cup (DLC 2)
     KOOPA_GROSSSTADTFIEBER_3DS(45, "Koopa-Großstadtfieber (3DS)"),
@@ -145,7 +146,7 @@ enum class Track( val id: Int,  // Eindeutige ID für die Strecke
     DAISYS_PISTE_WII(91, "Daisys Piste (Wii)"),
     PIRANHA_PFLANZEN_BUCHT_TOUR(92, "Piranha-Pflanzen-Bucht (Tour)"),
 
-    // Eichel-Cup
+    // Stachi-Cup
     STADTRUNDFAHRT_MADRID_TOUR(93, "Stadtrundfahrt Madrid (Tour)"),
     ROSALINAS_EISPLANET_3DS(94, "Rosalinas Eisplanet (3DS)"),
     BOWSERS_FESTUNG_3_SNES(95, "Bowsers Festung 3 (SNES)"),

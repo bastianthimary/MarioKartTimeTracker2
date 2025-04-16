@@ -1,11 +1,20 @@
 package com.buffe.mariokarttimetracker.util
 
+import com.buffe.mariokarttimetracker.data.model.Run
+
 object TimeFormatUtils {
     fun formatTime(timeMillis: Long): String {
         val minutes = timeMillis / 60000
         val seconds = (timeMillis % 60000) / 1000
         val millis = timeMillis % 1000
         return String.format("%d:%02d.%03d", minutes, seconds, millis)
+    }
+    fun signedFormatTime(timeMillis: Long): String{
+        if(timeMillis>0){
+           return "+"+formatTime(timeMillis)
+       }else{
+           return "-"+formatTime(timeMillis.unaryMinus())
+        }
     }
     fun hourFormatTime(timeMillis: Long): String {
         val hours = timeMillis / 3_600_000
@@ -16,7 +25,7 @@ object TimeFormatUtils {
         val millis = remainingAfterMinutes % 1_000
 
         return String.format(
-            "%02d:%02d:%02d.%03d",
+            "%01d:%02d:%02d.%03d",
             hours,
             minutes,
             seconds,
@@ -47,4 +56,7 @@ object TimeFormatUtils {
             }
         }
     }
+
+    fun calcRunsTotalTime(currentRun: Run) = formatTime(currentRun.races.sumOf { it.raceTime.timeMillis })
+
 }

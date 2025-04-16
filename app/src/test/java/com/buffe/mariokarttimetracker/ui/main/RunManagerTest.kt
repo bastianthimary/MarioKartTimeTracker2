@@ -1,8 +1,9 @@
 package com.buffe.mariokarttimetracker.ui.main
 
+import com.buffe.mariokarttimetracker.data.manager.RunManager
+import com.buffe.mariokarttimetracker.data.model.RaceTime
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.Test
 
 class RunManagerTest {
 

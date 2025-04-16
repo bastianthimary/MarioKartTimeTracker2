@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <!-- Hier können ViewModel-Bindings definiert werden, falls benötigt -->
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/black">
+
+        <!-- Überschrift -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Durchlauf Abgeschlossen!"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/titleText"
+            android:gravity="center" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="16dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:id="@+id/tvTotalTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Gesamtzeit: 0:00.000"
+                android:textColor="@color/white" />
+            <TextView
+                android:id="@+id/tvRank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Platzierung:"
+                android:textColor="@color/white" />
+            <TextView
+                android:id="@+id/tvTotalRecords"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Anzahl Gebrochene Rekorde: "
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:layout_marginTop="16dp"
+                android:gravity="center" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvSumBestTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Beste Zeit: 0:00.000"
+                android:textColor="@color/raceTimeRecord" />
+
+            <TextView
+                android:id="@+id/tvSumAverageTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Durchschnitt: 0:00.000"
+                android:textColor="@color/raceTimeBack" />
+        </LinearLayout>
+    </LinearLayout>
+        <!-- Expandable ListView für die einzelnen Rennzeiten -->
+        <ExpandableListView
+            android:id="@+id/expListView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="1dp"
+            android:groupIndicator="@null"
+            android:layout_marginTop="16dp" />
+
+        <!-- Button zum Zurückkehren zum Hauptbildschirm -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToMain"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hauptmenü"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
+            <!--app:icon="@drawable/ic_home" Ersetze ic_home durch dein Material Icon -->
+    </LinearLayout>
+</layout>

@@ -95,7 +95,7 @@ class StatisticManager {
             runRepository.sumOfRaceTimes(
                 raceRepository.getAllRacesTillTrack(
                     it.id!!,
-                    currentRun.currentRaceIndex
+                    currentRun.currentRaceIndex-1
                 )
             )
         }

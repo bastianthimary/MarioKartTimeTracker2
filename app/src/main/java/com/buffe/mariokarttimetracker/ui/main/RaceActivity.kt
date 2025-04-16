@@ -60,7 +60,6 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
         binding = ActivityRaceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         // Zoom-Gesten-Initialisierung
         scaleGestureDetector = ScaleGestureDetector(this, ScaleListener())
         binding.previewView.setOnTouchListener { _, event ->
@@ -95,7 +94,6 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
                     binding.etRaceTime.setSelection(formatted.length)
                 }
                 if(isValidTimeFormat(formatted)){
-                    binding.tvRunTotalTime.text="Gesamtzeit: ${calcYourTimeNow()}"
                     binding.btnNextRace.isEnabled=true
                 }
                 isFormatting = false
@@ -116,6 +114,7 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
             if (isValidTimeFormat(input)) {
                 val raceTime = RaceTime.fromString(input)
                 runManager.addCurrentRace(raceTime)
+                statisticManager.saveStatistic(runManager.getCurrentRun())
                 updateUI() // UI aktualisieren: nächstes Rennen laden, Statistiken aktualisieren
             } else {
                 Toast.makeText(this, "Das Zeitformat ist nicht Valide", Toast.LENGTH_SHORT).show()
@@ -123,17 +122,16 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
         }
     }
 
-    private fun calcYourTimeNow(): String {
-      val totalTimeBeforeRace= TimeFormatUtils.parseTime(statisticManager.getCurrentRunTotalTimeFormatted(runManager.getCurrentRun()))
-        val yourTimeNowInMs=totalTimeBeforeRace+TimeFormatUtils.parseTime(binding.etRaceTime.text.toString())
-        return TimeFormatUtils.formatTime(yourTimeNowInMs)
-    }
-
     @SuppressLint("SetTextI18n")
     private fun updateUI() {
         if(runManager.isFinished()){
             val intent = Intent(this, SummaryActivity::class.java).apply {
                 putExtra("Run", runManager.getCurrentRun())
+                putExtra("RunStatistic",statisticManager.runStatistic)
+                putExtra("BestRunTime",statisticManager.determineBestTotalTime())
+                putExtra("AverageRunTime",statisticManager.determineAverageTotalTime())
+                putExtra("RankOf",""+statisticManager.determineRankOfCurrentRun(runManager.getCurrentRun())+"/"+statisticManager.getNumberOfRuns())
+                statisticManager.clearStatistic()
             }
             startActivity(intent)
             finish()
@@ -142,39 +140,45 @@ class RaceActivity : AppCompatActivity(), TextResultListener {
         val currentTrack = runManager.getCurrentTrack()
         supportActionBar?.title = currentTrack.displayName
         // Aktualisiere aggregierte Zeiten (Gesamtzeit bis zur aktuellen Strecke, beste und durchschnittliche Zeit)
-        binding.tvRunTotalTime.text = "Gesamtzeit: ${statisticManager.getCurrentRunTotalTimeFormatted(runManager.getCurrentRun())}"
-        binding.tvCurrenRank.text= "Aktuelle Platzierung:${statisticManager.determineRankOfCurrentRun(runManager.getCurrentRun(),runManager.getCurrentTrack())}"
-        binding.tvBestRunTime.text = "Beste Zeit: ${statisticManager.determineCurrentBestTotalTimeFormatted(runManager.getCurrentTrack().id)}"
-        binding.tvAverageTime.text = "Durchschnitt: ${statisticManager.determineAverageTotalTimeFormattedBeforeCurrent(runManager.getCurrentTrack().id)}"
+        binding.tvRunTotalTime.text = "Gesamtzeit: \n${statisticManager.getCurrentRunTotalTimeFormatted(runManager.getCurrentRun())}"
+        binding.tvCurrenRank.text= "Aktuelle Platzierung: \n${statisticManager.determineRankOfCurrentRun(runManager.getCurrentRun())} /${statisticManager.getNumberOfRuns()}"
+        binding.tvBestRunTime.text = "Beste Zeit:\n ${statisticManager.determineCurrentBestTotalTimeFormatted(currentTrack.id)}\n" +
+                "    ("+TimeFormatUtils.signedFormatTime(statisticManager.determineTimeDifferenceToBest())+")"
+        binding.tvAverageTime.text = "Durchschnitt:\n ${statisticManager.determineAverageTotalTimeFormattedBeforeCurrent(currentTrack.id)}\n" +
+                "    ("+TimeFormatUtils.signedFormatTime(statisticManager.determineTimeDifferenceToAverage())+")"
 
-        determineAndSetRecordTextColor(binding.tvBestRaceTime,statisticManager.currentTotalTime,statisticManager.bestTotalTime)
-        determineAndSetTextColor(binding.tvAverageRaceTime,statisticManager.currentTotalTime,statisticManager.bestTotalTime)
+        determineAndSetRecordTextColor(binding.tvBestRunTime,statisticManager.currentTotalTime,statisticManager.bestTotalTime)
+        determineAndSetTextColor(binding.tvAverageTime,statisticManager.currentTotalTime,statisticManager.bestTotalTime)
         // Leere das Eingabefeld, falls vorhanden
         binding.etRaceTime.text?.clear()
         //Aktualisiere Historische Strecken Zeiten Durchschnitt und Bestzeiten
-        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${statisticManager.determineCurrentBestTrackTimeFormatted(runManager.getCurrentTrack().id)}"
-        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${statisticManager.determineCurrentAverageTrackTimeFormatted(runManager.getCurrentTrack().id)}"
+        binding.tvAverageRaceTime.text="Beste strecken Zeit: ${statisticManager.determineCurrentBestTrackTimeFormatted(currentTrack.id)}"
+        binding.tvBestRaceTime.text="Durchschnitt Streckenzeit: ${statisticManager.determineCurrentAverageTrackTimeFormatted(currentTrack.id)}"
         //Aktualisiere die Farben
 
         // Aktivieren/Deaktivieren des "Nächstes Rennen"-Buttons
         binding.btnNextRace.isEnabled =
             false // Beispielweise erst aktivieren, wenn eine gültige Eingabe vorliegt.
     }
+
     private fun determineAndSetTextColor(text:TextView,baseTime:RaceTime,compareTime:RaceTime){
         if(isCurrentFasterThen(baseTime.timeMillis,compareTime.timeMillis)){
-            text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeBack))
+            text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeLead))
+            return
         }
-        text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeLead))
+        text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeBack))
     }
     private fun determineAndSetRecordTextColor(text:TextView,baseTime:RaceTime,compareTime:RaceTime){
         if(isCurrentFasterThen(baseTime.timeMillis,compareTime.timeMillis)){
-            text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeBack))
+            text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeLead))
+            return
         }
         text.setTextColor(ContextCompat.getColor(this, R.color.raceTimeRecord))
     }
     fun isCurrentFasterThen(currentTime: Long, otherTime: Long): Boolean {
-        return currentTime < otherTime;
+        return currentTime < otherTime
     }
+
     @RequiresApi(Build.VERSION_CODES.R)
     private fun startCamera() {
         binding.previewView.visibility = View.VISIBLE

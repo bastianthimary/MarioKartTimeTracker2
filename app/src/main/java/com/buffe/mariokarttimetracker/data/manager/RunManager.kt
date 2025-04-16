@@ -47,7 +47,7 @@ class RunManager  {
 
 
     fun isFinished(): Boolean {
-       // Hack um Schneller auf Summuary zu kommen return currentRun.currentRaceIndex>=5
-       return currentRun.isCompleted()
+        // Hack um Schneller auf Summuary zu kommen   return currentRun.currentRaceIndex>=5
+         return currentRun.isCompleted()
     }
 }

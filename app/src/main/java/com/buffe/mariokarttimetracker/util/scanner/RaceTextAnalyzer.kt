@@ -9,6 +9,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.resume
 import kotlin.math.min
 
 class RaceTextAnalyzer(private val listener: TextResultListener) : ImageAnalysis.Analyzer {
@@ -30,134 +31,75 @@ class RaceTextAnalyzer(private val listener: TextResultListener) : ImageAnalysis
             return
         }
 
-        val bitmap = imageProxy.toBitmap()
-
-        // Verarbeite das Bild - jetzt mit nur einer optimierten Version
-        val processedBitmap = ImageProcessingUtils.createProcessedVersionsWithNames(bitmap)
-
-        // Job für die Überwachung und Zeitbegrenzung
-        var timeoutJob: Job? = null
-        val foundValidTime = AtomicBoolean(false)
-
-        timeoutJob = coroutineScope.launch {
-            // Timeout nach 300ms (reduziert von 500ms, da wir nur eine Verarbeitung haben)
-            delay(300)
-            if (!foundValidTime.get() && isActive) {
-                Log.d("RaceTextAnalyzer", "Processing timeout reached, using cached result")
-                val cachedTime = getMostFrequentTime()
-                if (cachedTime != null) {
-                    listener.onTextRecognized(cachedTime)
-                    foundValidTime.set(true)
-                }
-                // ImageProxy schließen
-                imageProxy.close()
-                processingInProgress.set(false)
-            }
-        }
-
-        // OCR auf dem verarbeiteten Bild durchführen
         coroutineScope.launch {
             try {
+                val bitmap = imageProxy.toBitmap()
+                val processedBitmap = ImageProcessingUtils.createProcessedVersionsWithNames(bitmap)
                 val image = InputImage.fromBitmap(processedBitmap, imageProxy.imageInfo.rotationDegrees)
 
-                recognizer.process(image)
-                    .addOnSuccessListener { visionText ->
-                        Log.i("RaceTextAnalyzer", "Raw text detected: ${visionText.text}")
+                // Nutze withTimeoutOrNull statt separatem Timeout-Job
+                withTimeoutOrNull(300) {
+                    try {
+                        val result = suspendCancellableCoroutine<String?> { continuation ->
+                            recognizer.process(image)
+                                .addOnSuccessListener { visionText ->
+                                    Log.i("RaceTextAnalyzer", "Raw text detected: ${visionText.text}")
+                                    val fullText = StringBuilder()
+                                    visionText.textBlocks.forEach { block ->
+                                        block.lines.forEach { line ->
+                                            fullText.append(line.text).append(" ")
+                                        }
+                                    }
 
-                        // Nur weitermachen, wenn noch keine Zeit erkannt wurde
-                        if (foundValidTime.get()) {
-                            return@addOnSuccessListener
+                                    val correctedText = correctOcrErrors(fullText.toString()).replace(" ", "")
+                                    var formattedText = correctTimeFormat(correctedText)
+
+                                    // Suche nach Zeitmustern
+                                    var bestMatch = findTimePattern(formattedText)
+                                    if (bestMatch.isEmpty()) {
+                                        bestMatch = findPartialTimePattern(correctedText)
+                                    }
+
+                                    if (bestMatch.isNotEmpty()) {
+                                        addTimeToCache(bestMatch)
+                                        continuation.resume(bestMatch)
+                                    } else {
+                                        continuation.resume(null)
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e("RaceTextAnalyzer", "Text recognition failed", e)
+                                    continuation.resume(null)
+                                }
                         }
 
-                        // Text verarbeiten
-                        val fullText = StringBuilder()
-                        visionText.textBlocks.forEach { block ->
-                            block.lines.forEach { line ->
-                                fullText.append(line.text).append(" ")
-                            }
-                        }
+                        // Ergebnis verarbeiten
+                        val finalResult = result ?: getMostFrequentTime() ?: ""
+                        listener.onTextRecognized(finalResult)
 
-                        val correctedText = correctOcrErrors(fullText.toString()).replace(" ", "")
-                        var formattedText = correctTimeFormat(correctedText)
-
-                        // 1. Suche nach vollständigem Zeitmuster
-                        var bestMatch = findTimePattern(formattedText)
-
-                        // 2. Wenn keine vollständige Zeit gefunden, versuche partielle Zeitformate zu erkennen
-                        if (bestMatch.isEmpty()) {
-                            bestMatch = findPartialTimePattern(correctedText)
-                        }
-
-                        // 3. Wenn eine Zeit gefunden wurde
-                        if (bestMatch.isNotEmpty()) {
-                            addTimeToCache(bestMatch)
-
-                            // Nur weitermachen, wenn wir noch keine Zeit zurückgegeben haben
-                            if (!foundValidTime.getAndSet(true)) {
-                                Log.d("RaceTextAnalyzer", "Found valid time: $bestMatch")
-                                listener.onTextRecognized(bestMatch)
-
-                                // Timeout-Job abbrechen
-                                timeoutJob?.cancel()
-
-                                // Ressourcen freigeben
-                                imageProxy.close()
-                                processingInProgress.set(false)
-                                return@addOnSuccessListener
-                            }
-                        } else {
-                            // Wenn keine Zeit erkannt wurde, prüfe den Cache
-                            val cachedTime = getMostFrequentTime()
-                            if (cachedTime != null && !foundValidTime.getAndSet(true)) {
-                                listener.onTextRecognized(cachedTime)
-                            } else if (!foundValidTime.getAndSet(true)) {
-                                listener.onTextRecognized("")
-                            }
-
-                            // Timeout-Job abbrechen
-                            timeoutJob?.cancel()
-
-                            // Ressourcen freigeben
-                            imageProxy.close()
-                            processingInProgress.set(false)
-                        }
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("RaceTextAnalyzer", "Text recognition failed", e)
-
-                        // Wenn keine Zeit erkannt wurde, prüfe den Cache
-                        if (!foundValidTime.getAndSet(true)) {
-                            val cachedTime = getMostFrequentTime()
-                            if (cachedTime != null) {
-                                listener.onTextRecognized(cachedTime)
-                            } else {
-                                listener.onTextRecognized("")
-                            }
-                        }
-
-                        // Ressourcen freigeben
-                        imageProxy.close()
-                        processingInProgress.set(false)
-                    }
-            } catch (e: Exception) {
-                Log.e("RaceTextAnalyzer", "Error processing image", e)
-
-                if (!foundValidTime.getAndSet(true)) {
-                    val cachedTime = getMostFrequentTime()
-                    if (cachedTime != null) {
+                    } catch (e: Exception) {
+                        Log.e("RaceTextAnalyzer", "Error in OCR processing", e)
+                        val cachedTime = getMostFrequentTime() ?: ""
                         listener.onTextRecognized(cachedTime)
-                    } else {
-                        listener.onTextRecognized("")
                     }
+                } ?: run {
+                    // Timeout erreicht
+                    Log.d("RaceTextAnalyzer", "Processing timeout reached, using cached result")
+                    val cachedTime = getMostFrequentTime() ?: ""
+                    listener.onTextRecognized(cachedTime)
                 }
 
-                // Ressourcen freigeben
+            } catch (e: Exception) {
+                Log.e("RaceTextAnalyzer", "Critical error in image analysis", e)
+                val cachedTime = getMostFrequentTime() ?: ""
+                listener.onTextRecognized(cachedTime)
+            } finally {
+                // Ressourcen in jedem Fall freigeben
                 imageProxy.close()
                 processingInProgress.set(false)
             }
         }
     }
-
     // Vereinfachte Cache-Funktionen für die letzten erkannten Zeiten
     private fun addTimeToCache(time: String) {
         // Füge die Zeit vorne in die Liste ein
